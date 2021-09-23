@@ -63,7 +63,6 @@ matrix = mult(matrix,ry);
                             "void main() {" +
                             "fColor = vColor;" +
                             "gl_Position = uMatrix * vPosition;" +
-                            //"gl_Position.z = -gl_Position.z;" +
                             "}"
     var vertexShader = gl.createShader(gl.VERTEX_SHADER);
     gl.shaderSource(vertexShader, vertexShaderCode);
