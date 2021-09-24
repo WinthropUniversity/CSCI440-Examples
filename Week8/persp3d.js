@@ -10,11 +10,26 @@ var gl;
 
 var pointLength;
 
-var matrixLoc;
-var matrix = mat4( 1, 0, 0, 0,
-                   0, 1, 0, 0,
-                   0, 0, 1, 0,
-                   0, 0, 0, 1 );
+var transMatrixLoc;
+var transMatrix = mat4( 1, 0, 0, 0,
+                        0, 1, 0, 0,
+                        0, 0, 1, 0,
+                        0, 0, 0, 1 );
+
+// The viewing volume ... changing this changes the perspective
+var nr   = -1;
+var fr   =  +1;
+var tp   =  +1;
+var bm   = -1;
+var lft  = -1;
+var rgt  = +1;
+
+var perspMatrixLoc;
+var perspMatrix = mat4( 
+  (2*nr)/(rgt-lft),  0,               (rgt+lft)/(rgt-lft),  0,
+  0,                 (2*nr)/(tp-bm),  (tp+bm)/(tp-bm),      0,
+  0,                 0,              -(fr+nr)/(fr-nr),      (-2*fr*nr)/(fr-nr),
+  0,                 0,              -1,                    0);
 
 // Convenion cos/sin
 var angle = 60;
@@ -36,12 +51,17 @@ var ry = mat4( cs,   0.0,  sn,   0.0,
               -sn,   0.0,  cs,   0.0,
                0.0,  0.0,  0.0,  1.0 );
 
-// Set the initial matrix to be a rotation over Z and over Y so we can see 
+// Set the initial transMatrix to be a rotation over Z and over Y so we can see 
 // the pyramid 3D shape ... otherwise, when we look straight down the Z
 // axis, it will look like a square.
-matrix = mult(matrix,rz);
-matrix = mult(matrix,ry);
-//matrix = mult(matrix,rx);
+//transMatrix = mult(transMatrix,rz);
+//transMatrix = mult(transMatrix,ry);
+
+var T = mat4( 1.0,  0.0, 0.0,  0.0,
+              0.0,  1.0, 0.0,  0.0,
+              0.0,  0.0, 1.0, -1.0,
+              0.0,  0.0, 0.0,  1.0)
+transMatrix = mult(transMatrix, T)
 
 /**
  *  Setup the vertex and fragment shader programs for WebGL.  This 
@@ -56,17 +76,29 @@ matrix = mult(matrix,ry);
  */
  function setupShaders() {
     // Attach the GLSL code to the vertex shader, then compile it
-    var vertexShaderCode =  "attribute vec4 vPosition;" +  // in-coming parameter
-                            "attribute vec4 vColor;" +     // in-coming parameter
-                            "uniform mat4 uMatrix;" +      // transformation matrix sent in
-                            "varying vec4 fColor;" +       // Passing color variable
+    var vertexShaderCode =  "attribute vec4 vPosition;" +   // in-coming parameter
+                            "attribute vec4 vColor;" +      // in-coming parameter
+                            "uniform mat4 uTransMatrix;" +  // Homogeneous transformation
+                            "uniform mat4 uPerspMatrix;" +  // Perspective transformation
+                            "varying vec4 fColor;" +        // Passing color variable
                             "void main() {" +
-                            "fColor = vColor;" +
-                            "gl_Position = uMatrix * vPosition;" +
+                            "    fColor = vColor;" +
+                            //"    gl_Position = uTransMatrix * vPosition;" +
+                            "    gl_Position = uPerspMatrix * uTransMatrix * vPosition;" +
+                            "    gl_Position.x = gl_Position.x / gl_Position.w;" +
+                            "    gl_Position.y = gl_Position.y / gl_Position.w;" +
+                            "    gl_Position.z = gl_Position.z / gl_Position.w;" +
+                            "    gl_Position.w = 1.0;" +
                             "}"
     var vertexShader = gl.createShader(gl.VERTEX_SHADER);
     gl.shaderSource(vertexShader, vertexShaderCode);
     gl.compileShader(vertexShader);
+    var compileSuccess = gl.getShaderParameter(vertexShader, gl.COMPILE_STATUS);
+    if (!compileSuccess) {
+      console.log('Vertex shader failed to compile!');    
+      var compilationLog = gl.getShaderInfoLog(vertexShader);
+      console.log('Shader compiler log: ' + compilationLog);
+    }
 
     // Attach the GLSL code to the fragment shader, then compile it
     var fragmentShaderCode = "precision mediump float;" +
@@ -76,7 +108,13 @@ matrix = mult(matrix,ry);
                              "}"
     var fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
     gl.shaderSource(fragmentShader, fragmentShaderCode);
-    gl.compileShader(fragmentShader);  
+    gl.compileShader(fragmentShader); 
+    compileSuccess = gl.getShaderParameter(fragmentShader, gl.COMPILE_STATUS);
+    if (!compileSuccess) {
+      console.log('Fragment shader failed to compile!');    
+      var compilationLog = gl.getShaderInfoLog(fragmentShader);
+      console.log('Shader compiler log: ' + compilationLog);
+    }
     
     // Create the shader program, attach both shaders in the pipline,
     // then tell WebGL to use that program
@@ -86,8 +124,14 @@ matrix = mult(matrix,ry);
     gl.linkProgram(shaderProgram);
     gl.useProgram(shaderProgram);   
     
-    // Grab the location for the matrix in the GPU
-    matrixLoc = gl.getUniformLocation( shaderProgram, "uMatrix" );
+    if ( !gl.getProgramParameter( shaderProgram, gl.LINK_STATUS) ) {
+      var info = gl.getProgramInfoLog(shaderProgram);
+      console.log('Could not compile WebGL program: ' + info);
+    }
+
+    // Grab the location for the matrices in the GPU
+    transMatrixLoc = gl.getUniformLocation( shaderProgram, "uTransMatrix" );
+    perspMatrixLoc = gl.getUniformLocation( shaderProgram, "uPerspMatrix" );
 
     return shaderProgram;
 }
@@ -103,9 +147,6 @@ function render() {
 
     // Draw the faces
     gl.drawArrays( gl.TRIANGLES, 0, pointLength );
-    //gl.drawArrays( gl.LINE_LOOP, 0, pointLength );
-
-    //window.requestAnimFrame(function() {render(gl, pointLength)});
 }
 
 
@@ -147,17 +188,18 @@ function setTranslationEventHandler() {
     var ty = parseFloat(document.getElementById("translatey").value);
     var tz = parseFloat(document.getElementById("translatez").value);
   
-    // Setup the translation matrix
+    // Setup the translation transMatrix
     var T = mat4( 1.0,  0.0,  0.0, tx,
                   0.0,  1.0,  0.0, ty,
                   0.0,  0.0,  1.0, tz,
                   0.0,  0.0,  0.0, 1.0);  
 
     // Concatenate with previous transformations:
-    matrix = mult(T, matrix);
+    transMatrix = mult(T, transMatrix);
                    
-    // Send the transformation matrix to the GPU, then draw!
-    gl.uniformMatrix4fv( matrixLoc, false, flatten(matrix));
+    // Send the transformation transMatrix to the GPU, then draw!
+    gl.uniformMatrix4fv( transMatrixLoc, false, flatten(transMatrix));
+    gl.uniformMatrix4fv( perspMatrixLoc, false, flatten(perspMatrix));
     render();
   }
 
@@ -170,17 +212,18 @@ function setTranslationEventHandler() {
     var sy = parseFloat(document.getElementById("scaley").value);
     var sz = parseFloat(document.getElementById("scalez").value);
   
-    // Setup the translation matrix
+    // Setup the translation transMatrix
     var S = mat4( sx,  0.0,  0.0, 0.0,
                   0.0,  sy,  0.0, 0.0,
                   0.0,  0.0, sz,  0.0,
                   0.0,  0.0, 0.0, 1.0);  
 
     // Concatenate with previous transformations:
-    matrix = mult(S, matrix);
+    transMatrix = mult(S, transMatrix);
   
-    // Send the transformation matrix to the GPU, then draw!
-    gl.uniformMatrix4fv( matrixLoc, false, flatten(matrix));
+    // Send the matrices to the GPU, then draw!
+    gl.uniformMatrix4fv( transMatrixLoc, false, flatten(transMatrix));
+    gl.uniformMatrix4fv( perspMatrixLoc, false, flatten(perspMatrix));
     render();
   }
   
@@ -219,32 +262,32 @@ window.onload = function init()
 
     // Create an array of points representing the pyramid
     var polygonPoints = [     
-      // Bottom square face, T1
-      vec4( 0.4,  0.0, -0.4,   1.0),  
-      vec4( 0.0, -0.4, -0.4,   1.0), 
-      vec4(-0.4,  0.0, -0.4,   1.0), 
-      // Bottom square face, T2
-      vec4( 0.4,  0.0, -0.4,   1.0),  
-      vec4(-0.4,  0.0, -0.4,   1.0), 
-      vec4( 0.0,  0.4, -0.4,   1.0),
-      // side 1 triangle face
-      vec4( 0.0, -0.4, -0.4,   1.0),  
-      vec4( 0.0,  0.0,  0.4,   1.0), // Tip
-      vec4( 0.4,  0.0, -0.4,   1.0), 
-      // side 2 triangle face
-      vec4( 0.4,  0.0, -0.4,   1.0),  
-      vec4( 0.0,  0.0, -0.4,   1.0), // Tip
-      vec4( 0.0,  0.4, -0.4,   1.0), 
-      // side 3 triangle face
-      vec4( 0.0,  0.4, -0.4,   1.0),  
-      vec4( 0.0,  0.0,  0.4,   1.0), // Tip
-      vec4(-0.4,  0.0, -0.4,   1.0), 
-      // side 4 triangle face
-      vec4(-0.4,  0.0, -0.4,   1.0),  
-      vec4( 0.0,  0.0,  0.4,   1.0), // Tip
-      vec4( 0.0, -0.4, -0.4,   1.0)
-  ];
-  pointLength = polygonPoints.length;
+        // Bottom square face, T1
+        vec4( 0.4,  0.0, -0.4,   1.0),  
+        vec4( 0.0, -0.4, -0.4,   1.0), 
+        vec4(-0.4,  0.0, -0.4,   1.0), 
+        // Bottom square face, T2
+        vec4( 0.4,  0.0, -0.4,   1.0),  
+        vec4(-0.4,  0.0, -0.4,   1.0), 
+        vec4( 0.0,  0.4, -0.4,   1.0),
+        // side 1 triangle face
+        vec4( 0.0, -0.4, -0.4,   1.0),  
+        vec4( 0.0,  0.0,  0.4,   1.0), // Tip
+        vec4( 0.4,  0.0, -0.4,   1.0), 
+        // side 2 triangle face
+        vec4( 0.4,  0.0, -0.4,   1.0),  
+        vec4( 0.0,  0.0, -0.4,   1.0), // Tip
+        vec4( 0.0,  0.4, -0.4,   1.0), 
+        // side 3 triangle face
+        vec4( 0.0,  0.4, -0.4,   1.0),  
+        vec4( 0.0,  0.0,  0.4,   1.0), // Tip
+        vec4(-0.4,  0.0, -0.4,   1.0), 
+        // side 4 triangle face
+        vec4(-0.4,  0.0, -0.4,   1.0),  
+        vec4( 0.0,  0.0,  0.4,   1.0), // Tip
+        vec4( 0.0, -0.4, -0.4,   1.0)
+    ];
+    pointLength = polygonPoints.length;
 
     var pointColors = [
       [1.0, 0.0, 0.0, 0.8], // red  // Square fase, T1
@@ -273,7 +316,8 @@ window.onload = function init()
 
 
     // --- Now Draw the Polygon for the First Time ---
-    gl.uniformMatrix4fv( matrixLoc, false, flatten(matrix));
+    gl.uniformMatrix4fv( transMatrixLoc, false, flatten(transMatrix));
+    gl.uniformMatrix4fv( perspMatrixLoc, false, flatten(perspMatrix));
     render(gl, polygonPoints.length);
 };
 

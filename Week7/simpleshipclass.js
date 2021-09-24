@@ -30,33 +30,33 @@ class SimpleShip {
      * Set the ship's geometry vertices.  This is called by the constructor.
      */
     CreateShapePoints() {
-        this.shapePoints = [     
-            // Bottom square face, T1
-            vec4( 0.4,  0.0,  0.0,   1.0),  
-            vec4( 0.0, -0.4,  0.0,   1.0), 
-            vec4(-0.4,  0.0,  0.0,   1.0), 
-            // Bottom square face, T2
-            vec4( 0.4,  0.0,  0.0,   1.0),  
-            vec4(-0.4,  0.0,  0.0,   1.0), 
-            vec4( 0.0,  0.4,  0.0,   1.0),
-            // side 1 triangle face
-            vec4( 0.0, -0.4,  0.0,   1.0),  
-            vec4( 0.0,  0.0,  0.8,   1.0), // Tip
-            vec4( 0.4,  0.0,  0.0,   1.0), 
-            // side 2 triangle face
-            vec4( 0.4,  0.0,  0.0,   1.0),  
-            vec4( 0.0,  0.0,  0.8,   1.0), // Tip
-            vec4( 0.0,  0.4,  0.0,   1.0), 
-            // side 3 triangle face
-            vec4( 0.0,  0.4,  0.0,   1.0),  
-            vec4( 0.0,  0.0,  0.8,   1.0), // Tip
-            vec4(-0.4,  0.0,  0.0,   1.0), 
-            // side 4 triangle face
-            vec4(-0.4,  0.0,  0.0,   1.0),  
-            vec4( 0.0,  0.0,  0.8,   1.0), // Tip
-            vec4( 0.0, -0.4,  0.0,   1.0)
-        ];
-
+        this.shapePoints = [      
+                // Bottom square face, T1
+                vec4( 0.4,  0.0, -0.4,   1.0),  
+                vec4( 0.0, -0.4, -0.4,   1.0), 
+                vec4(-0.4,  0.0, -0.4,   1.0), 
+                // Bottom square face, T2
+                vec4( 0.4,  0.0, -0.4,   1.0),  
+                vec4(-0.4,  0.0, -0.4,   1.0), 
+                vec4( 0.0,  0.4, -0.4,   1.0),
+                // side 1 triangle face
+                vec4( 0.0, -0.4, -0.4,   1.0),  
+                vec4( 0.0,  0.0,  0.4,   1.0), // Tip
+                vec4( 0.4,  0.0, -0.4,   1.0), 
+                // side 2 triangle face
+                vec4( 0.4,  0.0, -0.4,   1.0),  
+                vec4( 0.0,  0.0, -0.4,   1.0), // Tip
+                vec4( 0.0,  0.4, -0.4,   1.0), 
+                // side 3 triangle face
+                vec4( 0.0,  0.4, -0.4,   1.0),  
+                vec4( 0.0,  0.0,  0.4,   1.0), // Tip
+                vec4(-0.4,  0.0, -0.4,   1.0), 
+                // side 4 triangle face
+                vec4(-0.4,  0.0, -0.4,   1.0),  
+                vec4( 0.0,  0.0,  0.4,   1.0), // Tip
+                vec4( 0.0, -0.4, -0.4,   1.0)
+            ];
+        
       // Load the vertex data into the GPU
       this.shapeBufferID = this.gl.createBuffer();                                   // Create space on GPU
       this.gl.bindBuffer( this.gl.ARRAY_BUFFER, this.shapeBufferID );                         // Select that space to much about with

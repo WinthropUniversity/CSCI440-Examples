@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
+  <title>3D Polygon w/ Perspective Projection</title>
+
+  <script type="text/javascript" src="../../esangel-WebGL/Common/webgl-utils.js"></script>
+  <script type="text/javascript" src="../../esangel-WebGL/Common/MV.js"></script>
+
+  <!-- Run my example script -->
+  <script type="text/javascript" src="persp3D.js"></script>
+</head>
+
+<body>
+    <h1>3D Polygon w/ Perspective Projection</h1>
+    <canvas id="gl-canvas" width="512" height="512" style="border:1px solid #000000;">
+      Oops ... your browser doesn't support the HTML5 canvas element
+    </canvas>
+
+    <br><br>
+    Translate &nbsp;&nbsp;X: <input type="number" 
+                           id="translatex" 
+                           name="translatex" 
+                           value="0"
+                           min="-2"
+                           max="2"
+                           step=".1">
+    &nbsp;&nbsp;Y:<input type="number" 
+                           id="translatey" 
+                           name="translatey" 
+                           value="0"
+                           min="-2"
+                           max="2"
+                           step=".1">
+    &nbsp;&nbsp;Z:<input type="number" 
+                           id="translatez" 
+                           name="translatez" 
+                           value="0"
+                           min="-2"
+                           max="2"
+                           step=".1">
+    <button id= "translatebutton">Translate!</button><br>    
+
+    Scale &nbsp;&nbsp;X: <input type="number" 
+                           id="scalex" 
+                           name="scalex" 
+                           value="1"
+                           min="0.1"
+                           max="2"
+                           step=".1">
+    &nbsp;&nbsp;Y:<input type="number" 
+                           id="scaley" 
+                           name="scaley" 
+                           value="1"
+                           min="0.1"
+                           max="2"
+                           step="0.1">
+    &nbsp;&nbsp;Z:<input type="number" 
+                           id="scalez" 
+                           name="scalez" 
+                           value="1"
+                           min="0.1"
+                           max="2"
+                           step="0.1">
+    <button id= "scalebutton">Scale!</button><br>    
+
+</body>
+</html>
