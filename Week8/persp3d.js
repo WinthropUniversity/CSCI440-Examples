@@ -17,12 +17,13 @@ var transMatrix = mat4( 1, 0, 0, 0,
                         0, 0, 0, 1 );
 
 // The viewing volume ... changing this changes the perspective
-var nr   = -1;
-var fr   =  +1;
-var tp   =  +1;
-var bm   = -1;
-var lft  = -1;
-var rgt  = +1;
+var viewScale=.1;
+var nr   = -viewScale;
+var fr   = +viewScale;
+var tp   = +viewScale;
+var bm   = -viewScale;
+var lft  = -viewScale;
+var rgt  = +viewScale;
 
 var perspMatrixLoc;
 var perspMatrix = mat4( 
@@ -54,14 +55,9 @@ var ry = mat4( cs,   0.0,  sn,   0.0,
 // Set the initial transMatrix to be a rotation over Z and over Y so we can see 
 // the pyramid 3D shape ... otherwise, when we look straight down the Z
 // axis, it will look like a square.
-//transMatrix = mult(transMatrix,rz);
-//transMatrix = mult(transMatrix,ry);
+transMatrix = mult(transMatrix,rz);
+transMatrix = mult(transMatrix,ry);
 
-var T = mat4( 1.0,  0.0, 0.0,  0.0,
-              0.0,  1.0, 0.0,  0.0,
-              0.0,  0.0, 1.0, -1.0,
-              0.0,  0.0, 0.0,  1.0)
-transMatrix = mult(transMatrix, T)
 
 /**
  *  Setup the vertex and fragment shader programs for WebGL.  This 
@@ -203,29 +199,6 @@ function setTranslationEventHandler() {
     render();
   }
 
-/**
- *  This causes the shape to be scaled from its original position
- *  based on the parameters set in the spinner box fields on the HTML page.
- */
- function setScaleEventHandler() {
-    var sx = parseFloat(document.getElementById("scalex").value);
-    var sy = parseFloat(document.getElementById("scaley").value);
-    var sz = parseFloat(document.getElementById("scalez").value);
-  
-    // Setup the translation transMatrix
-    var S = mat4( sx,  0.0,  0.0, 0.0,
-                  0.0,  sy,  0.0, 0.0,
-                  0.0,  0.0, sz,  0.0,
-                  0.0,  0.0, 0.0, 1.0);  
-
-    // Concatenate with previous transformations:
-    transMatrix = mult(S, transMatrix);
-  
-    // Send the matrices to the GPU, then draw!
-    gl.uniformMatrix4fv( transMatrixLoc, false, flatten(transMatrix));
-    gl.uniformMatrix4fv( perspMatrixLoc, false, flatten(perspMatrix));
-    render();
-  }
   
 
 /**
@@ -255,7 +228,6 @@ window.onload = function init()
 
     // --- Add Event Handlers ---
     document.getElementById("translatebutton").onclick = setTranslationEventHandler
-    document.getElementById("scalebutton").onclick = setScaleEventHandler
 
 
     // --- Create the Shape, then Load Point Data Onto GPU ---
@@ -263,37 +235,37 @@ window.onload = function init()
     // Create an array of points representing the pyramid
     var polygonPoints = [     
         // Bottom square face, T1
-        vec4( 0.4,  0.0, -0.4,   1.0),  
-        vec4( 0.0, -0.4, -0.4,   1.0), 
-        vec4(-0.4,  0.0, -0.4,   1.0), 
+        vec4( 0.1,  0.0, -0.1,   1.0),  
+        vec4( 0.0, -0.1, -0.1,   1.0), 
+        vec4(-0.1,  0.0, -0.1,   1.0), 
         // Bottom square face, T2
-        vec4( 0.4,  0.0, -0.4,   1.0),  
-        vec4(-0.4,  0.0, -0.4,   1.0), 
-        vec4( 0.0,  0.4, -0.4,   1.0),
+        vec4( 0.1,  0.0, -0.1,   1.0),  
+        vec4(-0.1,  0.0, -0.1,   1.0), 
+        vec4( 0.0,  0.1, -0.1,   1.0),
         // side 1 triangle face
-        vec4( 0.0, -0.4, -0.4,   1.0),  
-        vec4( 0.0,  0.0,  0.4,   1.0), // Tip
-        vec4( 0.4,  0.0, -0.4,   1.0), 
+        vec4( 0.0, -0.1, -0.1,   1.0),  
+        vec4( 0.0,  0.0,  0.1,   1.0), // Tip
+        vec4( 0.1,  0.0, -0.1,   1.0), 
         // side 2 triangle face
-        vec4( 0.4,  0.0, -0.4,   1.0),  
-        vec4( 0.0,  0.0, -0.4,   1.0), // Tip
-        vec4( 0.0,  0.4, -0.4,   1.0), 
+        vec4( 0.1,  0.0, -0.1,   1.0),  
+        vec4( 0.0,  0.0, -0.1,   1.0), // Tip
+        vec4( 0.0,  0.1, -0.1,   1.0), 
         // side 3 triangle face
-        vec4( 0.0,  0.4, -0.4,   1.0),  
-        vec4( 0.0,  0.0,  0.4,   1.0), // Tip
-        vec4(-0.4,  0.0, -0.4,   1.0), 
+        vec4( 0.0,  0.1, -0.1,   1.0),  
+        vec4( 0.0,  0.0,  0.1,   1.0), // Tip
+        vec4(-0.1,  0.0, -0.1,   1.0), 
         // side 4 triangle face
-        vec4(-0.4,  0.0, -0.4,   1.0),  
-        vec4( 0.0,  0.0,  0.4,   1.0), // Tip
-        vec4( 0.0, -0.4, -0.4,   1.0)
+        vec4(-0.1,  0.0, -0.1,   1.0),  
+        vec4( 0.0,  0.0,  0.1,   1.0), // Tip
+        vec4( 0.0, -0.1, -0.1,   1.0)
     ];
     pointLength = polygonPoints.length;
 
     var pointColors = [
-      [1.0, 0.0, 0.0, 0.8], // red  // Square fase, T1
+      [1.0, 0.0, 0.0, 0.8], // red  // Square face, T1
       [1.0, 0.0, 0.0, 0.8], // red
       [1.0, 0.0, 0.0, 0.8], // red
-      [1.0, 0.0, 0.0, 0.8], // red  // Square fase, T2
+      [1.0, 0.0, 0.0, 0.8], // red  // Square face, T2
       [1.0, 0.0, 0.0, 0.8], // red
       [1.0, 0.0, 0.0, 0.8], // red
       [0.0, 0.0, 1.0, 0.8], // blue //  Triangle side 1

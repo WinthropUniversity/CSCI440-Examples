@@ -72,10 +72,10 @@ class SimpleShip {
      */
     CreateShapeColors() {
         this.shapeColors = [
-            [1.0, 0.0, 0.0, 0.8], // red  // Square fase, T1
+            [1.0, 0.0, 0.0, 0.8], // red  // Square face, T1
             [1.0, 0.0, 0.0, 0.8], // red
             [1.0, 0.0, 0.0, 0.8], // red
-            [1.0, 0.0, 0.0, 0.8], // red  // Square fase, T2
+            [1.0, 0.0, 0.0, 0.8], // red  // Square face, T2
             [1.0, 0.0, 0.0, 0.8], // red
             [1.0, 0.0, 0.0, 0.8], // red
             [0.0, 0.0, 1.0, 0.8], // blue //  Triangle side 1
