@@ -26,7 +26,6 @@
                             "void main() {" +
                             "    fColor = vColor;" +
                             "    gl_Position = uMatrix * vPosition;" +
-                            //"    gl_Position = vPosition;" +
                             "}"
     var vertexShader = gl.createShader(gl.VERTEX_SHADER);
     gl.shaderSource(vertexShader, vertexShaderCode);
@@ -43,7 +42,6 @@
                              "varying vec4 fColor;" +
                              "void main() {" + 
                              "    gl_FragColor = fColor;" +
-                             //"    gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);" +
                              "}"
     var fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
     gl.shaderSource(fragmentShader, fragmentShaderCode);
@@ -78,26 +76,34 @@
  */
 function render(gl, shipList) {
     gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    //gl.drawArrays( gl.TRIANGLES, 0, 18 );
+
+    // For all the ships to draw themselves
     for (let shipIdx=0; shipIdx<shipList.length; shipIdx++) {
         shipList[shipIdx].DrawShip();
     }
 
+    // -- Dance Little Pyrimids, Dance!! ---
+
+    // Make Ship 1 rotate around Y, then X, then Z
     if (shipList.length > 0) {
       shipList[0].RotateAroundY(0.5);
       shipList[0].RotateAroundX(0.5);
       shipList[0].RotateAroundZ(0.5);
     }
 
+    // Make Ship 2 rotate counter-clockwise around Z
     if (shipList.length > 1) 
-      shipList[1].RotateAroundZ(1);//RotateAroundVec(5, vec3(1,1,1));
+      shipList[1].RotateAroundZ(1);
 
+    // Make Ship 3 rotate clockwise around Z
     if (shipList.length > 2) 
-      shipList[2].RotateAroundZ(-1);//RotateAroundVec(5, vec3(1,1,1));
+      shipList[2].RotateAroundZ(-1);
 
+    // Make Ship4 rotate quickly around the unit vector version of: [-1, -1, -1]
     if (shipList.length > 3) 
       shipList[3].RotateAroundVec(4, vec3(-1,-1,-1));
 
+    // Re-queue the render function to keep drawing for animation
     window.requestAnimFrame(function() {render(gl, shipList)});    
 }
 
