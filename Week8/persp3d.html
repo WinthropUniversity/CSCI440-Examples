@@ -18,28 +18,13 @@
     </canvas>
 
     <br><br>
-    Translate &nbsp;&nbsp;X: <input type="number" 
-                           id="translatex" 
-                           name="translatex" 
-                           value="0"
-                           min="-2"
-                           max="2"
-                           step=".1">
-    &nbsp;&nbsp;Y:<input type="number" 
-                           id="translatey" 
-                           name="translatey" 
-                           value="0"
-                           min="-2"
-                           max="2"
-                           step=".1">
-    &nbsp;&nbsp;Z:<input type="number" 
-                           id="translatez" 
-                           name="translatez" 
-                           value="0"
-                           min="-2"
-                           max="2"
-                           step=".1">
-    <button id= "translatebutton">Translate!</button><br>    
-
+    Translate &nbsp;Z position of the camera: <input type="range" 
+                                    min="0" 
+                                    max="1" 
+                                    value="0.5" 
+                                    class="slider" 
+                                    step="0.1"
+                                    id="translatez">
+  
 </body>
 </html>
