@@ -194,9 +194,9 @@ function GetModelTransformationMatrix() {
   var snx = Math.sin(-Math.PI/8);
 
   // Some standard rotation matrices
-  var ts = mat4( 0.25,  0.0,  0.0,  0.0,
-                 0.0,  0.25,  0.0,  0.0,
-                 0.0,  0.0,  0.25,  0.0,
+  var ts = mat4( 0.1,  0.0,  0.0,  0.0,
+                 0.0,  0.1,  0.0,  0.0,
+                 0.0,  0.0,  0.1,  0.0,
                  0.0,  0.0,  0.0,  1.0 );                 
   var ry = mat4( csy,   0.0,  sny,   0.0,
                  0.0,  1.0,  0.0,  0.0,
@@ -335,7 +335,12 @@ async function main() {
     // Setup the vertex and fragment shaders (for color)
     var shaderProgram = setupShaders(gl);
 
-    const objFileContents = await UglyFetchWrapper('https://raw.githubusercontent.com/WinthropUniversity/CSCI440-Examples/master/Week7/teapot.obj');
+    // Try one of the other models!
+    const modelURL = 'https://raw.githubusercontent.com/WinthropUniversity/CSCI440-Examples/master/Week7/teapot.obj';
+    //const modelURL = 'https://raw.githubusercontent.com/WinthropUniversity/CSCI440-Examples/master/Week7/windmill.obj';
+    //const modelURL = 'https://raw.githubusercontent.com/WinthropUniversity/CSCI440-Examples/master/Week7/cube.obj';
+
+    const objFileContents = await UglyFetchWrapper(modelURL);
     const objData = SimpleObjParse(objFileContents);
     const points = VerySimpleTriangleVertexExtraction(objData);  
     const normals = EstimateNormalsFromTriangles(points);  
