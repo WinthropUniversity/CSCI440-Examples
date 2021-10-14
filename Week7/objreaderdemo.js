@@ -3,7 +3,7 @@
 
 /**
  * Auther:  R. Paul Wiegand
- * Purpose:  Demonstrates how to draw filled-in polygons in WebGL
+ * Purpose:  Demonstrates how to read OBJ files and render them in WebGL.
  */
 
 
@@ -49,7 +49,7 @@ function SimpleObjParse(objFileContents) {
   const vertexRE  = /^v .*/;
   const faceRE    = /^f .*/;
   const textureRE = /^vt .*/;
-  const normalRE  = /^vt .*/;
+  const normalRE  = /^vn .*/;
 
   for (let lineIDX=0; lineIDX<objFileLines.length; ++lineIDX) {
       // Trim the line of white space on either side
@@ -99,9 +99,9 @@ function SimpleObjParse(objFileContents) {
       // If this is a vertext line:  'vn -1.0000 0.0000 0.0000'
       else if (normalMatch != null) {
           const fields = line.split(/\s/); // Split at white space
-          vertextList.push( vec3(parseFloat(fields[1]),
-                                 parseFloat(fields[2]),
-                                 parseFloat(fields[3])) );
+          normalList.push( vec3(parseFloat(fields[1]),
+                                parseFloat(fields[2]),
+                                parseFloat(fields[3])) );
       }                
   }// End master for loop
 
@@ -118,7 +118,7 @@ function SimpleObjParse(objFileContents) {
  * @param {*} objDictionary the Dictionary obtained from reading the Wavefront OBJ file
  * @returns Array of vec4 points representing the object
  */
-function VerySimpleTriangleExtraction(objDictionary) {
+function VerySimpleTriangleVertexExtraction(objDictionary) {
   const vertexList = objDictionary.vertices;
   const faceList = objDictionary.faces;
   var points = new Array();
@@ -135,6 +135,51 @@ function VerySimpleTriangleExtraction(objDictionary) {
 }
 
 
+/**
+ *   Assumme array of points is arranged so that every three points form a 
+ *   triangle.  Then compute the normal to each triangle and create a list of
+ *   such normals; one for every vertex.
+ * @param {*} points An array of points, where every three points form a triangle
+ * @returns Array of vec3 points representing the normals of the object polygons
+ */
+ function EstimateNormalsFromTriangles(points) {
+  var normals = new Array();
+
+  for (let triIdx=0; triIdx<points.length; triIdx+=3) {
+      // Grab the next three points and assume they form a triangle
+      const p0 = vec3( points[triIdx+0][0],
+                       points[triIdx+0][1],
+                       points[triIdx+0][2] );
+      const p1 = vec3( points[triIdx+1][0],
+                       points[triIdx+1][1],
+                       points[triIdx+1][2] );
+      const p2 = vec3( points[triIdx+2][0],
+                       points[triIdx+2][1],
+                       points[triIdx+2][2] );
+
+      // The nornal to the triangle is:
+      //   (p2-p0) cross (p1-p0)
+      const u1 = subtract(p2,p0);
+      const u2 = subtract(p1,p0);
+      var n = cross(u1,u2);
+
+      // Make sure it is a unit vector
+      n = normalize(n);
+
+      // For now, let's assume the normal is the
+      // same for all three vertices
+      normals.push(n);
+      normals.push(n);
+      normals.push(n);
+  }
+
+  return (normals);
+}
+
+
+
+// --------------------------------------------------------
+// Most of the rest below is stuff you've already seen
 
 
 /**
@@ -149,9 +194,9 @@ function GetModelTransformationMatrix() {
   var snx = Math.sin(-Math.PI/8);
 
   // Some standard rotation matrices
-  var ts = mat4( 0.5,  0.0,  0.0,  0.0,
-                 0.0,  0.5,  0.0,  0.0,
-                 0.0,  0.0,  0.5,  0.0,
+  var ts = mat4( 0.25,  0.0,  0.0,  0.0,
+                 0.0,  0.25,  0.0,  0.0,
+                 0.0,  0.0,  0.25,  0.0,
                  0.0,  0.0,  0.0,  1.0 );                 
   var ry = mat4( csy,   0.0,  sny,   0.0,
                  0.0,  1.0,  0.0,  0.0,
@@ -164,8 +209,6 @@ function GetModelTransformationMatrix() {
  
   return ( mult(rx,mult(ry,ts)) );
 }
-
-
 
 
 /**
@@ -195,8 +238,6 @@ function GetModelTransformationMatrix() {
 }
 
 
-
-
 /**
  *  Setup the vertex and fragment shader programs for WebGL.  This 
  *  allows us to be able to display in color (among other things).
@@ -212,10 +253,10 @@ function GetModelTransformationMatrix() {
     // Attach the GLSL code to the vertex shader, then compile it
     var vertexShaderCode =  "attribute vec4 vPosition;" +  // in-coming parameter
                             "uniform mat4 uModelMatrix;" +  // Homogeneous transformation
-                            //"attribute vec4 vColor;" +     // in-coming parameter
-                            "varying vec4 fColor;" +       // Passing color variable
+                            "attribute vec3 vNormal;" +     // in-coming parameter
+                            "varying vec3 fColor;" +       // Passing color variable
                             "void main() {" +
-                            "    fColor = vPosition;" +
+                            "    fColor = vNormal;" +  // Make the color the normal?
                             "    gl_Position = uModelMatrix * vPosition;" +
                             "}"
     var vertexShader = gl.createShader(gl.VERTEX_SHADER);
@@ -230,10 +271,9 @@ function GetModelTransformationMatrix() {
 
     // Attach the GLSL code to the fragment shader, then compile it
     var fragmentShaderCode = "precision mediump float;" +
-                             "varying vec4 fColor;" +
+                             "varying vec3 fColor;" +
                              "void main() {" + 
-                             "    gl_FragColor = fColor;" +
-                             //"    gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);" +
+                             "    gl_FragColor = vec4(fColor, 1.0);" +
                              "}"
     var fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
     gl.shaderSource(fragmentShader, fragmentShaderCode);
@@ -282,7 +322,6 @@ function render(gl, pointLength, shaderProgram) {
     // Create the WebGL interface object and attach it to the 
     // canvas specified in the HTML file.  Give an error if WebGL
     // is not found
-//async function main() {
 async function main() {
     var canvas = document.getElementById( "gl-canvas" );
     var gl = WebGLUtils.setupWebGL( canvas );
@@ -296,11 +335,13 @@ async function main() {
     // Setup the vertex and fragment shaders (for color)
     var shaderProgram = setupShaders(gl);
 
-    const objFileContents = await UglyFetchWrapper('https://webglfundamentals.org/webgl/resources/models/cube/cube.obj');
+    const objFileContents = await UglyFetchWrapper('https://raw.githubusercontent.com/WinthropUniversity/CSCI440-Examples/master/Week7/teapot.obj');
     const objData = SimpleObjParse(objFileContents);
-    const points = VerySimpleTriangleExtraction(objData);  
+    const points = VerySimpleTriangleVertexExtraction(objData);  
+    const normals = EstimateNormalsFromTriangles(points);  
 
     var vertexBufferId = LoadDataOnGPU(gl, points.flat(), "vPosition", 4, shaderProgram);
+    var normalBufferId = LoadDataOnGPU(gl, normals.flat(), "vNormal", 3, shaderProgram);
 
     // --- Draw those ships! ---
     render(gl, points.length, shaderProgram);
