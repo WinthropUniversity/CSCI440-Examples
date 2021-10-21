@@ -46,8 +46,8 @@ function SimpleObjParse(objFileContents) {
   //     a particular face.  There's a normal associated with each face.
   //     An object may have many faces.
 
-  const vertexRE  = /^v .*/;
-  const faceRE    = /^f .*/;
+  const vertexRE  = /^[vV] .*/;
+  const faceRE    = /^[fF] .*/;
   const textureRE = /^vt .*/;
   const normalRE  = /^vn .*/;
 
