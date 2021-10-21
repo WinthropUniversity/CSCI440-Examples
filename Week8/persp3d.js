@@ -18,7 +18,7 @@ var cameraMatrixLoc;
 var identity = mat4( 1, 0 ,0 ,0,
                      0, 1, 0, 0,
                      0, 0, 1, 0,
-                     0, 0 ,0 , 1);
+                     0, 0, 0, 1);
 
 /**
  * Basic rotation transformation of the model.  Rotate around x, then y, then z.
@@ -54,6 +54,7 @@ function GetModelTransformationMatrix(xRotationAngle, yRotationAngle, zRotationA
                  0.0,  0.0,  0.0,  1.0 );
  
   return ( mult(rz,mult(ry,rx)) );
+  //return (identity);
 }
 
 
@@ -73,14 +74,13 @@ function GetPerspectiveProjectionMatrix(fovy, near, far) {
   var fr = far;
   var tp = nr * Math.tan(fovyRadian);
   var rgt = tp * aspectRatio;
-  //var lft = -rgt;
-  var bt = -bt;
 
   return ( mat4( 
     nr/rgt,  0,             0,                     0,
     0,      nr/tp,          0,                     0,
     0,      0,              -(fr+nr)/(fr-nr),      (-2*fr*nr)/(fr-nr),
     0,      0,              -1,                    0) );  
+  //return (identity);
 }
 
 
@@ -126,9 +126,11 @@ function GetCameraViewOrientationMatrix(eye, at, up) {
   var M = inverse(A);
 
   // Or just use the built-in function for this ...
-  //var M = lookAt(eye, at, up);
-  //M = inverse(M);
-  
+  //var Mp = lookAt(eye, at, up);
+  //Mp = inverse(Mp);
+  //console.log("M = ", M);
+  //console.log("Mp= ", Mp);
+
   // Return the view orientation change matrix for the camera
   return (M);
 }
@@ -145,7 +147,7 @@ function GetCameraViewOrientationMatrix(eye, at, up) {
   var cameraMatrix = GetCameraViewOrientationMatrix(vec3(0, 0, zCameraPosition),   // where is the camera?
                                                     vec3(0, 0, 0),   // where is it looking?
                                                     vec3(0, 1, 0) ); // Which way is up?
-  var perspMatrix = GetPerspectiveProjectionMatrix(45, -.1, .1);
+  var perspMatrix = GetPerspectiveProjectionMatrix(45, -0.1, .2);
 
   // --- Now Draw the Polygon for the First Time ---
   gl.uniformMatrix4fv( modelMatrixLoc, false, flatten(modelMatrix));
@@ -182,12 +184,15 @@ function GetCameraViewOrientationMatrix(eye, at, up) {
                             "varying vec4 fColor;" +        // Passing color variable
                             "void main() {" +
                             "    fColor = vColor;" +
-                            //"    gl_Position = uTransMatrix * vPosition;" +
                             "    gl_Position = uPerspMatrix * uCameraMatrix * uModelMatrix * vPosition;" +
-                            "    gl_Position.x = gl_Position.x / gl_Position.w;" +
-                            "    gl_Position.y = gl_Position.y / gl_Position.w;" +
-                            "    gl_Position.z = gl_Position.z / gl_Position.w;" +
-                            "    gl_Position.w = 1.0;" +
+                            "    if (gl_Position.w <= 0.0) " + 
+                            "      gl_Position = vec4(2.0, 2.0, 2.0, 1.0);" +
+                            "    else {" + 
+                            "      gl_Position.x = gl_Position.x / gl_Position.w;" +
+                            "      gl_Position.y = gl_Position.y / gl_Position.w;" +
+                            "      gl_Position.z = gl_Position.z / gl_Position.w;" +
+                            "      gl_Position.w = 1.0;" +
+                            "      }" +
                             "}"
     var vertexShader = gl.createShader(gl.VERTEX_SHADER);
     gl.shaderSource(vertexShader, vertexShaderCode);
@@ -229,9 +234,9 @@ function GetCameraViewOrientationMatrix(eye, at, up) {
     }
 
     // Grab the location for the matrices in the GPU
-    modelMatrixLoc = gl.getUniformLocation( shaderProgram, "uModelMatrix" );
+    modelMatrixLoc  = gl.getUniformLocation( shaderProgram, "uModelMatrix" );
     cameraMatrixLoc = gl.getUniformLocation( shaderProgram, "uCameraMatrix" );
-    perspMatrixLoc = gl.getUniformLocation( shaderProgram, "uPerspMatrix" );
+    perspMatrixLoc  = gl.getUniformLocation( shaderProgram, "uPerspMatrix" );
 
     return shaderProgram;
 }
@@ -272,7 +277,7 @@ function LoadDataOnGPU(gl, myData, shaderVariableStr, shaderVariableDim, shaderP
  */
 function setTranslationEventHandler() {
     var tz = parseFloat(document.getElementById("translatez").value);
-    render(tz);
+    render(-tz);
   }
 
   
@@ -324,7 +329,7 @@ window.onload = function init()
         vec4( 0.1,  0.0, -0.1,   1.0), 
         // side 2 triangle face
         vec4( 0.1,  0.0, -0.1,   1.0),  
-        vec4( 0.0,  0.0, -0.1,   1.0), // Tip
+        vec4( 0.0,  0.0,  0.1,   1.0), // Tip
         vec4( 0.0,  0.1, -0.1,   1.0), 
         // side 3 triangle face
         vec4( 0.0,  0.1, -0.1,   1.0),  
@@ -362,7 +367,7 @@ window.onload = function init()
     var colorBufferId = LoadDataOnGPU(gl, pointColors, "vColor", 4, shaderProgram  )
 
     pointLength = polygonPoints.length;
-    render(0.5); //gl, polygonPoints.length);
+    render(-0.5); //gl, polygonPoints.length);
 };
 
 
