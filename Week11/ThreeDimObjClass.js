@@ -130,18 +130,15 @@ class ThreeDimObj {
         this.gl.texImage2D(this.gl.TEXTURE_2D, // What kind of texture?
                            0,                  // Level for MipMapping
                            this.gl.RGBA,       // How many components per texel?
-                           //textureWidth,       // Width of texture image
-                           //textureHeight,      // Height of texture image
-                           //0,                  // Thickness of texture border
                            this.gl.RGBA,       // Color format of texels
                            this.gl.UNSIGNED_BYTE, // Type of data of texel components
                            this.textureImage); // Actual image to map
 
-        // Setup filters
-        //this.gl.generateMipmap(this.gl.TEXTURE_2D);
-        //this.gl.texParameteri(this.gl.TEXTURE_2D,              // Target of the filter
-        //                      this.gl.TEXTURE_MIN_FILTER,      // Type of filter to use
-        //                      this.gl.NEAREST_MIPMAP_LINEAR ); // Mode of the filter
+        // Setup MipMap filter
+        this.gl.generateMipmap(this.gl.TEXTURE_2D);
+        this.gl.texParameteri(this.gl.TEXTURE_2D,              // Target of the filter
+                              this.gl.TEXTURE_MIN_FILTER,      // Type of filter to use
+                              this.gl.NEAREST_MIPMAP_LINEAR ); // Mode of the filter
         this.gl.texParameteri(this.gl.TEXTURE_2D,              // Target of the filter
                               this.gl.TEXTURE_MAG_FILTER,      // Type of filter to use
                               this.gl.NEAREST );               // Mode of the filter

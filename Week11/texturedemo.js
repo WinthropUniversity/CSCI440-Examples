@@ -107,7 +107,8 @@ var gCanvas = null;
                              "    if (fTexCoord.x < 0.0)" +  // Flag to ignore texture
                              "      gl_FragColor = fColor;" +
                              "    else" +
-                             "      gl_FragColor = fColor*texture2D( texture, fTexCoord );" + 
+                             "      gl_FragColor = texture2D( texture, fTexCoord );" +  // Use only texture
+//                             "      gl_FragColor = fColor*texture2D( texture, fTexCoord );" +  // Combine texture
                              "}"
     var fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
     gl.shaderSource(fragmentShader, fragmentShaderCode);
@@ -207,7 +208,7 @@ async function main() {
 
     // Configure WebGL by setting the canvas view and the background color
     gl.viewport( 0, 0, canvas.width, canvas.height ); // View whole canvas
-    gl.clearColor( 0.9, 0.9, 0.9, 1.0 );              // BG:  Opaque Gray
+    gl.clearColor( 0.8, 0.8, 0.8, 1.0 );              // BG:  Opaque Gray
     gl.enable(gl.DEPTH_TEST);
 
     // Setup the vertex and fragment shaders
@@ -234,25 +235,24 @@ async function main() {
     //var modelURL = 'https://raw.githubusercontent.com/WinthropUniversity/CSCI440-Examples/master/Week7/windmill.obj';
     var objFileContents = await UglyFetchWrapper(modelURL);    
     var myObject = new ThreeDimObj(gl, shaderProgram, objFileContents);
-    myObject.Scale(0.1, 0.1, 0.1);
+    myObject.Scale(0.05, 0.05, 0.05);
+    myObject.Translate(-0.2, -0.2, -0.2);
+    myObject.SetMatrialProperties(vec4(0.8,0.8,0.8,1.0), 10000.0);
     gObjectsList.push(myObject);
 
     modelURL = 'https://raw.githubusercontent.com/WinthropUniversity/CSCI440-Examples/master/Week7/cube.obj';
     objFileContents = await UglyFetchWrapper(modelURL);    
     myObject = new ThreeDimObj(gl, shaderProgram, objFileContents);
-    myObject.Scale(0.05, 0.05, 0.05);
+    myObject.Scale(0.1, 0.1, 0.1);
     myObject.Translate(0.2, 0.2, 0.2);
     myObject.RotateAroundAxes(30,15,20);
     myObject.SetMatrialProperties(vec4(1.0,0.0,0.0,1.0), 10000.0);
-    //var image = document.getElementById("boxtextureimage");
     var image = new Image();
     image.onload = function() {
       myObject.SetTextureProperties(image, 360.0, 240.0);
     }
-    image.crossOrigin = "anonymous";
-    //image.src = "falltexture.png";
-    //image.src= "https://raw.githubusercontent.com/WinthropUniversity/CSCI440-Examples/8e108adbae4d163cb2549fda45c75c85780edc4a/Week11/lavatexture.png";
-    image.src= "lavatexture.png";
+    image.crossOrigin = "anonymous";  // to avoid the CORS error ...
+    image.src = "https://raw.githubusercontent.com/WinthropUniversity/CSCI440-Examples/master/Week11/falltexture.png";
     gObjectsList.push(myObject);
 
   
