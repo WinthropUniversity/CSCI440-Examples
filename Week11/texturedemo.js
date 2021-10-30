@@ -107,7 +107,7 @@ var gCanvas = null;
                              "    if (fTexCoord.x < 0.0)" +  // Flag to ignore texture
                              "      gl_FragColor = fColor;" +
                              "    else" +
-                             "      fColor*texture2D( texture, fTexCoord );" + 
+                             "      gl_FragColor = fColor*texture2D( texture, fTexCoord );" + 
                              "}"
     var fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
     gl.shaderSource(fragmentShader, fragmentShaderCode);
@@ -244,8 +244,15 @@ async function main() {
     myObject.Translate(0.2, 0.2, 0.2);
     myObject.RotateAroundAxes(30,15,20);
     myObject.SetMatrialProperties(vec4(1.0,0.0,0.0,1.0), 10000.0);
-    var image = document.getElementById("boxtextureimage");
-    myObject.SetTextureProperties(image, 360.0, 240.0);
+    //var image = document.getElementById("boxtextureimage");
+    var image = new Image();
+    image.onload = function() {
+      myObject.SetTextureProperties(image, 360.0, 240.0);
+    }
+    image.crossOrigin = "anonymous";
+    //image.src = "falltexture.png";
+    //image.src= "https://raw.githubusercontent.com/WinthropUniversity/CSCI440-Examples/8e108adbae4d163cb2549fda45c75c85780edc4a/Week11/lavatexture.png";
+    image.src= "lavatexture.png";
     gObjectsList.push(myObject);
 
   

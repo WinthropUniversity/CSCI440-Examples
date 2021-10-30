@@ -138,10 +138,10 @@ class ThreeDimObj {
                            this.textureImage); // Actual image to map
 
         // Setup filters
-        this.gl.generateMipmap(this.gl.TEXTURE_2D);
-        this.gl.texParameteri(this.gl.TEXTURE_2D,              // Target of the filter
-                              this.gl.TEXTURE_MIN_FILTER,      // Type of filter to use
-                              this.gl.NEAREST_MIPMAP_LINEAR ); // Mode of the filter
+        //this.gl.generateMipmap(this.gl.TEXTURE_2D);
+        //this.gl.texParameteri(this.gl.TEXTURE_2D,              // Target of the filter
+        //                      this.gl.TEXTURE_MIN_FILTER,      // Type of filter to use
+        //                      this.gl.NEAREST_MIPMAP_LINEAR ); // Mode of the filter
         this.gl.texParameteri(this.gl.TEXTURE_2D,              // Target of the filter
                               this.gl.TEXTURE_MAG_FILTER,      // Type of filter to use
                               this.gl.NEAREST );               // Mode of the filter
@@ -495,15 +495,16 @@ class ThreeDimObj {
      * @param {*} points Array of vertices, assumed each four points form a face
      */
     ExtractTextureCoordsForRectangularFaces(points) {
-        this.texturePoints = new Array();
+        var texturePoints = new Array();
 
         for (let ptIdx = 0; ptIdx < points.length; ptIdx += 4) {
-          this.texturePoints.push( vec2(0.0, 0.0) );
-          this.texturePoints.push( vec2(1.0, 0.0) );
-          this.texturePoints.push( vec2(1.0, 1.0) );
-          this.texturePoints.push( vec2(0.0, 1.0) );
+          texturePoints.push( vec2(0.0, 0.0) );
+          texturePoints.push( vec2(1.0, 0.0) );
+          texturePoints.push( vec2(1.0, 1.0) );
+          texturePoints.push( vec2(0.0, 1.0) );
         }
     
+        return (texturePoints);
     }
 
 };
