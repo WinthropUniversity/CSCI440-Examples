@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
+  <title>Example for Loading OBJ via 3JS</title>
+
+  <!--<script src="https://greggman.github.io/webgl-lint/webgl-lint.js" crossorigin></script>-->
+  <script type="text/javascript" src="../../esangel-WebGL/Common/webgl-utils.js"></script>
+  <script type="text/javascript" src="../../esangel-WebGL/Common/MV.js"></script>
+  <script type="text/javascript" src="ThreeDimObjClass.js"></script>  
+   
+  <!-- Run my example script -->
+  <script type="text/javascript" src="texturedemo.js"></script>
+</head>
+
+<body>
+    <h1>Derp</h1>
+    <p>Derpity-derp.
+    </p>
+    <canvas id="gl-canvas" width="512" height="512" style="border:1px solid #000000;">
+      Oops ... your browser doesn't support the HTML5 canvas element
+    </canvas>
+
+    <br><br>
+
+    Z-Position of Camera: <input type="range" 
+    min="0.2" 
+    max="1.5" 
+    value="0.75" 
+    class="slider" 
+    step="0.05"
+    id="zcamera">
+
+    Theta of Camera: <input type="range" 
+    min="0" 
+    max="360" 
+    value="90" 
+    class="slider" 
+    step="1"
+    id="thetacamera">
+
+    <img id="boxtextureimage" src="lavatexture.png"></img>
+
+
+</body>
+</html>

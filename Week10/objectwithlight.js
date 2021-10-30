@@ -346,7 +346,7 @@ function GetModelTransformationMatrix() {
 function SetupLighting(lightPosition, materialShininess, gl, shaderProgram) {
   // Setup low-level Ambient lighting
   var ambientColor = vec4(0.25, 0.25, 0.25, 1.0); 
-  var ambientMaterial = vec4(1.0, 0.0, 1.0, 1.0);
+  var ambientMaterial = vec4(1.0, 1.0, 1.0, 1.0);
   var ambientProduct = mult(ambientColor, ambientMaterial);
   gl.uniform4fv(gl.getUniformLocation(shaderProgram, "uAmbientProduct"), flatten(ambientProduct));
 
