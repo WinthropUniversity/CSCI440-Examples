@@ -80,13 +80,13 @@ var gCanvas = null;
                             "  fColor = ambient + diffuse + specular;" + 
                             "  fColor.a = 1.0;" + // Ignore transluscence for now  */
                             //"  fColor = vec4(vNormal, 1.0);" + // Null-op the lighting
-                            "fTexCoord = vTexCoord;" + // Pass along the texture coordinate
+                            "  fTexCoord = vTexCoord;" + // Pass along the texture coordinate
                             "" + // Now compute the position after perspective transformation
-                            "    gl_Position = uProjectionMatrix * uCameraMatrix * uModelMatrix * vPosition;" +
-                            "    gl_Position.x = gl_Position.x / gl_Position.w;" +
-                            "    gl_Position.y = gl_Position.y / gl_Position.w;" +
-                            "    gl_Position.z = gl_Position.z / gl_Position.w;" +
-                            "    gl_Position.w = 1.0;" +
+                            "  gl_Position = uProjectionMatrix * uCameraMatrix * uModelMatrix * vPosition;" +
+                            "  gl_Position.x = gl_Position.x / gl_Position.w;" +
+                            "  gl_Position.y = gl_Position.y / gl_Position.w;" +
+                            "  gl_Position.z = gl_Position.z / gl_Position.w;" +
+                            "  gl_Position.w = 1.0;" +
                             "}"
     var vertexShader = gl.createShader(gl.VERTEX_SHADER);
     gl.shaderSource(vertexShader, vertexShaderCode);
@@ -107,8 +107,8 @@ var gCanvas = null;
                              "    if (fTexCoord.x < 0.0)" +  // Flag to ignore texture
                              "      gl_FragColor = fColor;" +
                              "    else" +
-                             "      gl_FragColor = texture2D( texture, fTexCoord );" +  // Use only texture
-//                             "      gl_FragColor = fColor*texture2D( texture, fTexCoord );" +  // Combine texture
+                             //"      gl_FragColor = texture2D( texture, fTexCoord );" +  // Use only texture
+                             "      gl_FragColor = fColor*texture2D( texture, fTexCoord );" +  // Combine texture
                              "}"
     var fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
     gl.shaderSource(fragmentShader, fragmentShaderCode);
@@ -249,7 +249,7 @@ async function main() {
     myObject.SetMatrialProperties(vec4(1.0,0.0,0.0,1.0), 10000.0);
     var image = new Image();
     image.onload = function() {
-      myObject.SetTextureProperties(image, 360.0, 240.0);
+      myObject.SetTextureProperties(image);
     }
     image.crossOrigin = "anonymous";  // to avoid the CORS error ...
     image.src = "https://raw.githubusercontent.com/WinthropUniversity/CSCI440-Examples/master/Week11/falltexture.png";

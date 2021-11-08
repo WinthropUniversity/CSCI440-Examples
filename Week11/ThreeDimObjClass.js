@@ -117,7 +117,7 @@ class ThreeDimObj {
      * @param {*} textureWidth Texture image width
      * @param {*} textureHeight Texture image height
      */
-    SetTextureProperties(textureImage, textureWidth, textureHeight) {
+    SetTextureProperties(textureImage) {
         this.textureImage = textureImage;
 
         // Create the texture setup in the graphics pipeline
