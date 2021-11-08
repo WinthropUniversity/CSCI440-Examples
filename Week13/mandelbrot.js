@@ -2,8 +2,40 @@
 
 /**
  * Auther:  R. Paul Wiegand
- * Purpose:  Demonstrates how to draw filled-in polygons in WebGL
+ * Purpose:  Demonstrates how to use the pixel shader in WebGL for fractals
  */
+
+var gMinReal = -2.2;
+var gMaxReal = 1.55;
+var gMinImag = -1.35;
+var gMaxImag = 1.7;
+
+var gPointLength;
+var ggl;
+var gShaderProgram;
+var gWidth;
+var gHeight;
+
+
+function handleCanvasClick(event) {
+    const canvasClickX = event.pageX;
+    const canvasClickY = gHeight - event.pageY;    
+
+    const fractalClickX = (gMaxReal - gMinReal) * (canvasClickX / gWidth) + gMinReal;
+    const fractalClickY = (gMaxImag - gMinImag) * (canvasClickY / gHeight) + gMinImag;
+
+    const fractalScaleX = (gMaxReal - gMinReal) / 2;
+    const fractalScaleY = (gMaxImag - gMinImag) / 2;
+
+    gMinReal = fractalClickX - fractalScaleX/2;
+    gMaxReal = gMinReal + fractalScaleX;
+
+    gMinImag = fractalClickY - fractalScaleY/2;
+    gMaxImag = gMinImag + fractalScaleY;
+
+    render();
+}
+
 
 
 /**
@@ -105,12 +137,19 @@
  * @param {Object} gl - The WegGL graphic library object
  * @param {array} pointLength - The points of the polygon we are shading
  */
-function render(gl, pointLength) {
+function render() {
+    ggl.uniform1f( ggl.getUniformLocation(gShaderProgram, "uMinReal"), gMinReal);
+    ggl.uniform1f( ggl.getUniformLocation(gShaderProgram, "uMaxReal"), gMaxReal);
+    ggl.uniform1f( ggl.getUniformLocation(gShaderProgram, "uMinImag"), gMinImag);
+    ggl.uniform1f( ggl.getUniformLocation(gShaderProgram, "uMaxImag"), gMaxImag);
+    ggl.uniform1f( ggl.getUniformLocation(gShaderProgram, "uFieldWidth"), parseFloat(gWidth));
+    ggl.uniform1f( ggl.getUniformLocation(gShaderProgram, "uFieldHeight"), parseFloat(gHeight));
+
     // Configure WebGL by setting the canvas view and the background color
-    gl.clear( gl.COLOR_BUFFER_BIT );                  // Clear color buffer bit
+    ggl.clear( ggl.COLOR_BUFFER_BIT );                  // Clear color buffer bit
 
     // Draw three triangles: p0-p1-p2, p0-p2-p3, p0-p3-p4
-    gl.drawArrays( gl.TRIANGLE_FAN, 0, pointLength );
+    ggl.drawArrays( ggl.TRIANGLE_FAN, 0, gPointLength );
 }
 
 
@@ -140,6 +179,8 @@ function LoadDataOnGPU(gl, myData, shaderVariableStr, shaderVariableDim, shaderP
 
     return bufferID;
 }
+
+
 
 
 /**
@@ -178,20 +219,16 @@ window.onload = function init()
     //var colorBufferID = LoadDataOnGPU(gl, textureCoordinates, "vTexCoords", 3, shaderProgram);
     var vertexBufferId = LoadDataOnGPU(gl, points, "vPosition", 4, shaderProgram);
 
-    const minReal = -2.2;
-    const maxReal = 1.55;
-    const minImag = -1.35;
-    const maxImag = 1.7;
-
-    gl.uniform1f( gl.getUniformLocation(shaderProgram, "uMinReal"), minReal);
-    gl.uniform1f( gl.getUniformLocation(shaderProgram, "uMaxReal"), maxReal);
-    gl.uniform1f( gl.getUniformLocation(shaderProgram, "uMinImag"), minImag);
-    gl.uniform1f( gl.getUniformLocation(shaderProgram, "uMaxImag"), maxImag);
-    gl.uniform1f( gl.getUniformLocation(shaderProgram, "uFieldWidth"), parseFloat(canvas.width));
-    gl.uniform1f( gl.getUniformLocation(shaderProgram, "uFieldHeight"), parseFloat(canvas.height));
+    // Global assigns to use the render in event handlers
+    ggl =gl;
+    gPointLength = points.length;
+    gShaderProgram = shaderProgram;
+    gWidth = canvas.width;
+    gHeight = canvas.height;
+    canvas.onclick = handleCanvasClick;
 
     // --- Draw that polygon! ---
-    render(gl, points.length);
+    render();
 };
 
 
