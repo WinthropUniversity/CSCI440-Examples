@@ -87,12 +87,12 @@ function handleCanvasClick(event) {
                              "    float v = 0.0;" +
                              "    float escapeRatio = 0.0;" +
                              "" +
-                             "    for (int escCount=0; escCount<100; escCount++) {" + 
+                             "    for (int escCount=0; escCount<200; escCount++) {" + 
                              "      float tempx = zx*zx - zy*zy + cx;" +
                              "      zy = 2.0*zx*zy + cy;" +
                              "      zx = tempx;" +
                              "      v = zx*zx + zy*zy;" +
-                             "      escapeRatio = float(escCount) / 100.0;" +
+                             "      escapeRatio = float(escCount) / 200.0;" +
                              "      if (v > 4.0) break;" +
                              "    }" +  
                              "" +

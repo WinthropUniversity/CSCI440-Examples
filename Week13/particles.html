@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
+  <title>Particle Sim Example</title>
+
+  <!--<script src="https://greggman.github.io/webgl-lint/webgl-lint.js" crossorigin></script>-->
+  <script type="text/javascript" src="../../esangel-WebGL/Common/webgl-utils.js"></script>
+  <script type="text/javascript" src="../../esangel-WebGL/Common/MV.js"></script>
+  <script type="text/javascript" src="ParticleField.js"></script>  
+   
+  <!-- Run my example script -->
+  <script type="text/javascript" src="particles.js"></script>
+</head>
+
+<body>
+    <h1>Particle Simulation Example</h1>
+    <canvas id="gl-canvas" width="512" height="512" style="border:1px solid #000000;">
+      Oops ... your browser doesn't support the HTML5 canvas element
+    </canvas>
+
+    <br><br>
+
+    Number of Particles: <input type="range" 
+    min="50" 
+    max="1000" 
+    value="100" 
+    class="slider" 
+    step="10"
+    id="numParticles">
+
+</body>
+</html>
