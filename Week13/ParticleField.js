@@ -17,8 +17,11 @@ class ParticleField {
         this.velocities = [];
         this.accelerations = []
 
+        const xlb = this.xRange[0];
+        const xub = 0.1*(this.xRange[1] - this.xRange[0]) + this.xRange[0];
+
         for (let pIdx=0; pIdx<this.numParticles; pIdx++) {
-            this.positions.push( vec4(drawInRange(xRange),
+            this.positions.push( vec4(drawInRange([xlb, xub]),
                                       drawInRange(yRange),
                                       drawInRange(zRange),
                                       1.0) );
@@ -49,17 +52,28 @@ class ParticleField {
 
 
     UpdateAccelerations(kernelRange, integratingFunction) {
+        const MAXFORCE=0.1;
         for (let pIdx=0; pIdx<this.positions.length; pIdx++) {
             var nbrIndexes = this.GetNeighboringIndices(kernelRange, pIdx);
-            var force = vec3(0,0,0);
-            //for (let nIdx=0; nIdx<nbrIndexes.length; nIdx++) {
-              //var a = integratingFunction(this.positions[pIdx],
-              //                            this.positions[nIdx],
-              //                            this.mass);
-            //}
-            this.accelerations[pIdx]= vec3(drawInRange([-0.1,0.1]),  // RPW:  Temporary for testing
-                                           drawInRange([-0.1,0.1]),
-                                           drawInRange([-0.1,0.1]));
+            var force = vec4(0,0,0);  // Initial force of gravity
+            for (let nIdx=0; nIdx<nbrIndexes.length; nIdx++) {
+              var p0 = this.positions[pIdx];
+              var p1 = this.positions[nIdx];
+
+              if (p0!=p1) {
+                // Compute the direction and magnitude of the force
+                var v = subtract(p0,p1);
+                var dir = normalize(v);
+                var forceMag = Math.min(1.0 * this.mass * this.mass / dot(v,v), MAXFORCE);
+
+                // Accumulate the force, but make sure it stays a vector
+                force = add(force, scale(forceMag, dir ) );
+                force[3] = 0.0;
+              }
+            }
+            this.accelerations[pIdx]= force;//vec3(drawInRange([-0.1,0.1]),  // RPW:  Temporary for testing
+                                      //     drawInRange([-0.1,0.1]),
+                                      //     drawInRange([-0.1,0.1]));
         }
     }
  
@@ -69,11 +83,13 @@ class ParticleField {
             const a = this.accelerations[pIdx];
             this.velocities[pIdx] = vec3( v[0] + a[0]*dt,
                                           v[1] + a[1]*dt,
-                                          v[2] + a[1]*dt );
+                                          v[2] + a[2]*dt );
         }
     }
 
     BoundaryCheck(pIdx) {
+        const oldPoint = this.positions[pIdx];
+
         // Bounce off x wall
         if (this.positions[pIdx][0] < this.xRange[0]) {
           this.positions[pIdx][0] = this.xRange[0];
@@ -103,17 +119,22 @@ class ParticleField {
             this.positions[pIdx][2] = this.zRange[1];
             this.velocities[pIdx][2] = -this.velocities[pIdx][2];
         }   
+
+        if (this.positions[pIdx][0] == NaN) this.positions[pIdx] = oldPoint;
+        if (this.positions[pIdx][1] == NaN) this.positions[pIdx] = oldPoint;
+        if (this.positions[pIdx][2] == NaN) this.positions[pIdx] = oldPoint;
     }
 
     UpdatePositions(dt){
         for (let pIdx=0; pIdx<this.positions.length; pIdx++) {
             const p = this.positions[pIdx];
             const v = this.velocities[pIdx];
-            this.velocities[pIdx] = vec3( p[0] + v[0]*dt,
-                                          p[1] + v[1]*dt,
-                                          p[2] + v[1]*dt );
+            this.positions[pIdx] = vec4( p[0] + v[0]*dt,
+                                         p[1] + v[1]*dt,
+                                         p[2] + v[2]*dt, 1.0 );
             this.BoundaryCheck(pIdx);
         }
+        //alert(this.positions[0]);
     }
 
     InitialGPULoad() {
@@ -132,6 +153,8 @@ class ParticleField {
         // Load the vertex data into the GPU
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBufferID);   // Select that space to much about with
         this.gl.bufferData(this.gl.ARRAY_BUFFER, flatten(this.positions), this.gl.STATIC_DRAW); // Load data into space
+        var posVar = this.gl.getAttribLocation(this.shaderProgram, "vPosition"); // Get variable position in Shader
+        this.gl.vertexAttribPointer(posVar, 4, this.gl.FLOAT, false, 0, 0);      // Point variable to currently bound buffer
     }
 
 }
