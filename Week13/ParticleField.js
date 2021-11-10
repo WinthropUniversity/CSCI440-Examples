@@ -55,32 +55,42 @@ class ParticleField {
         const MAXFORCE=0.1;
         for (let pIdx=0; pIdx<this.positions.length; pIdx++) {
             var nbrIndexes = this.GetNeighboringIndices(kernelRange, pIdx);
-            var force = vec4(0,0,0);  // Initial force of gravity
+            var force = vec4(0,-10.0,0);  // Initial force of gravity
             for (let nIdx=0; nIdx<nbrIndexes.length; nIdx++) {
               var p0 = this.positions[pIdx];
               var p1 = this.positions[nIdx];
 
               if (p0!=p1) {
-                // Compute the direction and magnitude of the force
-                var v = subtract(p0,p1);
-                var dir = normalize(v);
-                var forceMag = Math.min(1.0 * this.mass * this.mass / dot(v,v), MAXFORCE);
+                try {
+                    // Compute the direction and magnitude of the force
+                    var v = subtract(p1,p0);
+                    var dir = normalize(v);
+                    var distSq = dot(v,v);
+                    var gravConst = -0.01;
+                    if (distSq>kernelRange/3) gravConst = -gravConst;
+                    var forceMag = Math.min(gravConst * this.mass * this.mass / distSq, MAXFORCE);
 
-                // Accumulate the force, but make sure it stays a vector
-                force = add(force, scale(forceMag, dir ) );
-                force[3] = 0.0;
+                    // Accumulate the force, but make sure it stays a vector
+                    force = add(force, scale(forceMag, dir ) );
+                    force[3] = 0.0;
+                } catch (err) {};
               }
             }
             this.accelerations[pIdx]= force;//vec3(drawInRange([-0.1,0.1]),  // RPW:  Temporary for testing
                                       //     drawInRange([-0.1,0.1]),
                                       //     drawInRange([-0.1,0.1]));
+            if (this.positions[pIdx][0] == NaN) this.positions[pIdx][0] = 0;
+            if (this.positions[pIdx][1] == NaN) this.positions[pIdx][1] = 0;
+            if (this.positions[pIdx][2] == NaN) this.positions[pIdx][2] = 0;
+            if (this.positions[pIdx][3] != 1.0) this.positions[pIdx][2] = 1.0;
         }
     }
  
     UpdateVelocities(dt){
+        const FRICTION=0.5;
         for (let pIdx=0; pIdx<this.positions.length; pIdx++) {
-            const v = this.velocities[pIdx];
-            const a = this.accelerations[pIdx];
+            const v = scale(FRICTION,this.velocities[pIdx]);
+            const a = scale(FRICTION,this.accelerations[pIdx]);
             this.velocities[pIdx] = vec3( v[0] + a[0]*dt,
                                           v[1] + a[1]*dt,
                                           v[2] + a[2]*dt );

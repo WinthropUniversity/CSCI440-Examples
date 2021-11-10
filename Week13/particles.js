@@ -200,15 +200,15 @@ function render() {
     DrawBoundingBox();
 
     gParticleField.UpdateAccelerations(0.05);
-    gParticleField.UpdateVelocities(1);
-    gParticleField.UpdatePositions(1);
+    gParticleField.UpdateVelocities(0.1);
+    gParticleField.UpdatePositions(0.1);
     gParticleField.UpdateGPU();
 
     //ggl.drawArrays(ggl.TRIANGLES, 0, gParticleField.positions.length);
     ggl.drawArrays(ggl.POINTS, 0, gParticleField.positions.length);
 
     //alert(gParticleField.positions[0]);
-    //window.requestAnimFrame(function() {render();});    
+    window.requestAnimFrame(function() {render();});    
 }
 
 
