@@ -23,6 +23,8 @@
  */
  function setupShaders(gl) {
     // Attach the GLSL code to the vertex shader, then compile it
+    // NOTE:  Notice that the actual vertex in the buffer NEVER MOVES ... the canvas position
+    //        is simply COMPUTED DIFFERENTLY based on theta inside the vertex shader
     var vertexShaderCode =  "attribute vec4 position;" +  // in-coming parameter
                             "uniform float uTheta;" +     // variable we will alter 
                             "void main() {" +
@@ -71,7 +73,7 @@ function render(gl, pointLength, theta) {
     // Clear the color buffer
     gl.clear( gl.COLOR_BUFFER_BIT );
 
-    // Update theta by 0.1 radians, send to GPU
+    // Update theta by 0.1 radians, send directly to GPU to a specific location
     theta -= 0.01;
     gl.uniform1f( thetaLoc, theta);
 

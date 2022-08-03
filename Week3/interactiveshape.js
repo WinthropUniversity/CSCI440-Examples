@@ -24,6 +24,10 @@
  */
  function setupShaders(gl) {
     // Attach the GLSL code to the vertex shader, then compile it
+    // NOTE:  Again, the vertices in the buffer remain constant and instead
+    //        the vertex shader computes where they should be on the canvas
+    //        differently depending on theta.  Theta direction is changed by
+    //        interactivity in this case.
     var vertexShaderCode =  "attribute vec4 position;" +  // in-coming parameter
                             "uniform float uTheta;" +     // variable we will alter 
                             "void main() {" +
