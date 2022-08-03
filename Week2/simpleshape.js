@@ -19,9 +19,10 @@
  */
  function setupShaders(gl) {
     // Attach the GLSL code to the vertex shader, then compile it
+    // The vertex shader decides *where on the canvas* vertices will go
     var vertexShaderCode =  "attribute vec4 position;" +  // in-coming parameter
-                            "attribute vec3 color;" +      // in-coming parameter
-                            "varying vec3 vColor;" +  // Passing arg between shaders
+                            "attribute vec3 color;" +     // in-coming parameter
+                            "varying vec3 vColor;" +      // Internal variable to pass arg between shaders
                             "void main() {" +
                             "    gl_PointSize = 5.0;" +
                             "    gl_Position = position;" +
@@ -32,6 +33,7 @@
     gl.compileShader(vertexShader);
 
     // Attach the GLSL code to the fragment shader, then compile it
+    // The fragment shader will decide *what color* the pixels representing the objects will be
     var fragmentShaderCode = "precision mediump float;" +
                              "varying vec3 vColor;" +  // Received param between shaders
                              "void main() {" + 
@@ -88,7 +90,7 @@ function LoadDataOnGPU(gl, myData, shaderVariableStr, shaderVariableDim, shaderP
     // Load the vertex data into the GPU
     var bufferID = gl.createBuffer();                                   // Create space on GPU
     gl.bindBuffer( gl.ARRAY_BUFFER, bufferID );                         // Select that space to much about with
-    gl.bufferData( gl.ARRAY_BUFFER, flatten(myData), gl.STATIC_DRAW ); // Load data into space
+    gl.bufferData( gl.ARRAY_BUFFER, flatten(myData), gl.STATIC_DRAW );  // Load data into space
 
     // Associate out shader position variables with our data buffer
     if (shaderVariableStr != "") {
