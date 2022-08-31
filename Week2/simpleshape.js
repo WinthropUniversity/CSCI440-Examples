@@ -71,6 +71,7 @@ function render(gl, canvas, points) {
     gl.clear( gl.COLOR_BUFFER_BIT );                  // Clear color buffer bit
 
     // Draw three triangles: p0-p1-p2, p0-p2-p3, p0-p3-p4
+    // How would we draw this as five triangles, each with their own solid color?
     gl.drawArrays( gl.TRIANGLE_FAN, 0, points.length );
 }
 
