@@ -24,7 +24,7 @@
                             "attribute vec3 color;" +     // in-coming parameter
                             "varying vec3 vColor;" +      // Internal variable to pass arg between shaders
                             "void main() {" +
-                            "    gl_PointSize = 5.0;" +
+                            "    gl_PointSize = 15.0;" +
                             "    gl_Position = position;" +
                             "    vColor = color;" +
                             "}"
@@ -72,7 +72,10 @@ function render(gl, canvas, points) {
 
     // Draw three triangles: p0-p1-p2, p0-p2-p3, p0-p3-p4
     // How would we draw this as five triangles, each with their own solid color?
-    gl.drawArrays( gl.TRIANGLE_FAN, 0, points.length );
+    gl.drawArrays( gl.TRIANGLES, 0, points.length );
+    gl.drawArrays( gl.POINTS, 0, points.length );
+    //gl.drawArrays( gl.LINES, 0, points.length );
+    //gl.drawArrays( gl.LINE_LOOP, 0, points.length );
 }
 
 
@@ -126,19 +129,49 @@ window.onload = function init()
 
     // Create an array of points representing the polygon
     var polygonPoints = [     // theta
-        vec2( 1.00,   0.00),  //   0
-        vec2( 0.31,   0.95),  //  2*pi/5
-        vec2(-0.81,   0.59),  //  4*pi/5
-        vec2(-0.81,  -0.59),  //  6*pi/5
-        vec2( 0.31,  -0.95)   //  8*pi/5
+        // Triangle 1
+        vec2( 0.00,   0.00),  // center   p0
+        vec2( 1.00,   0.00),  //   0      p1
+        vec2( 0.31,   0.95),  //  2*pi/5  p2
+        // Triangle 2
+        vec2( 0.00,   0.00),  // center   p0
+        vec2( 0.31,   0.95),  //  2*pi/5  p2
+        vec2(-0.81,   0.59),  //  4*pi/5  p3
+        // Triangle 3
+        vec2( 0.00,   0.00),  // center   p0
+        vec2(-0.81,   0.59),  //  4*pi/5  p3
+        vec2(-0.81,  -0.59),  //  6*pi/5  p4
+        // Triangle 4
+        vec2( 0.00,   0.00),  // center   p0
+        vec2(-0.81,  -0.59),  //  6*pi/5  p4
+        vec2( 0.31,  -0.95),  //  8*pi/5  p5
+        // Triangle 5
+        vec2( 0.00,   0.00),  // center   p0
+        vec2( 0.31,  -0.95),  //  8*pi/5  p5
+        vec2( 1.00,   0.00)  //   0      p1
     ];
 
     // Create array of colors 
     var colors = [
+        // Triangle 1
         vec3(0,0,0),  // black
+        vec3(0,0,0),  // black
+        vec3(0,0,0),  // black
+        // Triangle 2
         vec3(0,0,1),  // blue
+        vec3(0,0,1),  // blue
+        vec3(0,0,1),  // blue
+        // Triangle 3
         vec3(0,1,1),  // aqua
+        vec3(0,1,1),  // aqua
+        vec3(0,1,1),  // aqua
+        // Triangle 4
         vec3(0,1,0),  // green
+        vec3(0,1,0),  // green
+        vec3(0,1,0),  // green
+        // Triangle 5
+        vec3(1,1,0),  // yellow
+        vec3(1,1,0),  // yellow
         vec3(1,1,0)   // yellow
     ];
 
