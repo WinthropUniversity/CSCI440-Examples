@@ -20,7 +20,7 @@
  function setupShaders(gl) {
     // Attach the GLSL code to the vertex shader, then compile it
     var vertexShaderCode =  "attribute vec4 position;" +  // in-coming parameter
-                            "attribute vec3 color;" +      // in-coming parameter
+                            "attribute vec3 color;" +     // in-coming parameter
                             "void main() {" +
                             "    gl_Position = position;" +
                             "}"
@@ -31,7 +31,7 @@
     // Attach the GLSL code to the fragment shader, then compile it
     var fragmentShaderCode = "precision mediump float;" +
                              "void main() {" + 
-                             "    gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);" +
+                             "    gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);" + // Solid red
                              "}"
     var fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
     gl.shaderSource(fragmentShader, fragmentShaderCode);
