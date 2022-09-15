@@ -31,8 +31,8 @@
     var vertexShaderCode =  "attribute vec4 position;" +  // in-coming parameter
                             "uniform float uTheta;" +     // variable we will alter 
                             "void main() {" +
-                            "    gl_Position.x = -sin(uTheta) * position.x + cos(uTheta) * position.y;" +
-                            "    gl_Position.y =  sin(uTheta) * position.y + cos(uTheta) * position.x;" +
+                            "    gl_Position.x =  cos(uTheta) * position.x + sin(uTheta) * position.y;" +
+                            "    gl_Position.y = -sin(uTheta) * position.x + cos(uTheta) * position.y;" +
                             "    gl_Position.z = 0.0;" +
                             "    gl_Position.w = 1.0;" +
                             "}"
