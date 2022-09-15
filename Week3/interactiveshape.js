@@ -9,6 +9,7 @@
 
  var thetaLoc;
  var direction=1;
+ var speed = 0.01;
 
 
 /**
@@ -78,7 +79,7 @@ function render(gl, pointLength, theta) {
 
     // Update theta by 0.1 radians, send to GPU, rotate in the direction
     // given by the "direction" variable
-    theta += direction * 0.01;
+    theta += direction * speed;
     gl.uniform1f( thetaLoc, theta);
 
     // Draw three triangles: p0-p1-p2, p0-p2-p3, p0-p3-p4
@@ -121,6 +122,7 @@ function LoadDataOnGPU(gl, myData, shaderVariableStr, shaderVariableDim, shaderP
  */
 function changeDirectionEventHandler() {
     direction *= -1;
+    speed += 0.01;
 }
 
 

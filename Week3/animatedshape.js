@@ -74,7 +74,7 @@ function render(gl, pointLength, theta) {
     gl.clear( gl.COLOR_BUFFER_BIT );
 
     // Update theta by 0.1 radians, send directly to GPU to a specific location
-    theta -= 0.01;
+    theta += 0.005;
     gl.uniform1f( thetaLoc, theta);
 
     // Draw three triangles: p0-p1-p2, p0-p2-p3, p0-p3-p4
