@@ -31,29 +31,29 @@ class SimpleShip {
      */
     CreateShapePoints() {
         this.shapePoints = [      
-                // Bottom square face, T1
-                vec4( 0.4,  0.0, -0.4,   1.0),  
-                vec4( 0.0, -0.4, -0.4,   1.0), 
-                vec4(-0.4,  0.0, -0.4,   1.0), 
-                // Bottom square face, T2
+                // Bottom square face, T1 (red)
+                vec4( 0.4,  0.0, -0.4,   1.0),    // Bottom is all at z=-+0.4
+                vec4( 0.0, -0.4, -0.4,   1.0),    // Otherwise 4 corners of the
+                vec4(-0.4,  0.0, -0.4,   1.0),    // +/- 0.4 box at z=-0.4
+                // Bottom square face, T2 (red)
                 vec4( 0.4,  0.0, -0.4,   1.0),  
                 vec4(-0.4,  0.0, -0.4,   1.0), 
                 vec4( 0.0,  0.4, -0.4,   1.0),
-                // side 1 triangle face
+                // side 1 triangle face (blue)    from (0,-.4) and (.4,0) to the tip
                 vec4( 0.0, -0.4, -0.4,   1.0),  
-                vec4( 0.0,  0.0,  0.4,   1.0), // Tip
+                vec4( 0.0,  0.0,  0.4,   1.0), // Tip at xy=0, z=.4
                 vec4( 0.4,  0.0, -0.4,   1.0), 
-                // side 2 triangle face
+                // side 2 triangle face (purple)  from (.4,0) and (0,.4) to the tip
                 vec4( 0.4,  0.0, -0.4,   1.0),  
-                vec4( 0.0,  0.0, -0.4,   1.0), // Tip
+                vec4( 0.0,  0.0,  0.4,   1.0), // Tip at xy=0, z=.4
                 vec4( 0.0,  0.4, -0.4,   1.0), 
-                // side 3 triangle face
+                // side 3 triangle face (green)   from (0,.4) and (-.4,0) to the tip
                 vec4( 0.0,  0.4, -0.4,   1.0),  
-                vec4( 0.0,  0.0,  0.4,   1.0), // Tip
+                vec4( 0.0,  0.0,  0.4,   1.0), // Tip at xy=0, z=.4
                 vec4(-0.4,  0.0, -0.4,   1.0), 
-                // side 4 triangle face
+                // side 4 triangle face (yellow)  from (-.4,0) and (0,-.4) to the tip
                 vec4(-0.4,  0.0, -0.4,   1.0),  
-                vec4( 0.0,  0.0,  0.4,   1.0), // Tip
+                vec4( 0.0,  0.0,  0.4,   1.0), // Tip at xy=0, z=.4
                 vec4( 0.0, -0.4, -0.4,   1.0)
             ];
         
@@ -72,24 +72,24 @@ class SimpleShip {
      */
     CreateShapeColors() {
         this.shapeColors = [
-            [1.0, 0.0, 0.0, 0.8], // red  // Square face, T1
-            [1.0, 0.0, 0.0, 0.8], // red
-            [1.0, 0.0, 0.0, 0.8], // red
-            [1.0, 0.0, 0.0, 0.8], // red  // Square face, T2
-            [1.0, 0.0, 0.0, 0.8], // red
-            [1.0, 0.0, 0.0, 0.8], // red
-            [0.0, 0.0, 1.0, 0.8], // blue //  Triangle side 1
-            [0.0, 0.0, 1.0, 0.8], // blue
-            [0.0, 0.0, 1.0, 0.8], // blue
-            [1.0, 1.0, 1.0, 1.0], // purple //  Triangle side 2
-            [1.0, 1.0, 1.0, 1.0], // purple
-            [1.0, 1.0, 1.0, 1.0], // purple
-            [0.0, 1.0, 0.0, 0.8], // green //  Triangle side 3
-            [0.0, 1.0, 0.0, 0.8], // green
-            [0.0, 1.0, 0.0, 0.8], // green
-            [1.0, 1.0, 0.0, 0.8], // yellow //  Triangle side 4
-            [1.0, 1.0, 0.0, 0.8], // yellow
-            [1.0, 1.0, 0.0, 0.8], // yellow
+            [1.0, 0.0, 0.0, 1.0], // red  // Square face, T1
+            [1.0, 0.0, 0.0, 1.0], // red
+            [1.0, 0.0, 0.0, 1.0], // red
+            [1.0, 0.0, 0.0, 1.0], // red  // Square face, T2
+            [1.0, 0.0, 0.0, 1.0], // red
+            [1.0, 0.0, 0.0, 1.0], // red
+            [0.0, 0.0, 1.0, 1.0], // blue //  Triangle side 1
+            [0.0, 0.0, 1.0, 1.0], // blue
+            [0.0, 0.0, 1.0, 1.0], // blue
+            [1.0, 0.0, 1.0, 1.0], // purple //  Triangle side 2
+            [1.0, 0.0, 1.0, 1.0], // purple
+            [1.0, 0.0, 1.0, 1.0], // purple
+            [0.0, 1.0, 0.0, 1.0], // green //  Triangle side 3
+            [0.0, 1.0, 0.0, 1.0], // green
+            [0.0, 1.0, 0.0, 1.0], // green
+            [1.0, 1.0, 0.0, 1.0], // yellow //  Triangle side 4
+            [1.0, 1.0, 0.0, 1.0], // yellow
+            [1.0, 1.0, 0.0, 1.0], // yellow
           ];
 
         // Load the vertex data into the GPU

@@ -61,8 +61,8 @@ matrix = mult(matrix,ry);
                             "uniform mat4 uMatrix;" +      // transformation matrix sent in
                             "varying vec4 fColor;" +       // Passing color variable
                             "void main() {" +
-                            "fColor = vColor;" +
-                            "gl_Position = uMatrix * vPosition;" +
+                            "  fColor = vColor;" +
+                            "  gl_Position = uMatrix * vPosition;" +
                             "}"
     var vertexShader = gl.createShader(gl.VERTEX_SHADER);
     gl.shaderSource(vertexShader, vertexShaderCode);
@@ -202,18 +202,14 @@ window.onload = function init()
     // Configure WebGL by setting the canvas view and the background color
     gl.viewport( 0, 0, canvas.width, canvas.height ); // View whole canvas
     gl.clearColor( 0.9, 0.9, 0.9, 1.0 );              // BG:  Opaque Gray
-
     gl.enable(gl.DEPTH_TEST);
-
 
     // Setup the vertex and fragment shaders (for color)
     var shaderProgram = setupShaders(gl);
 
-
     // --- Add Event Handlers ---
     document.getElementById("translatebutton").onclick = setTranslationEventHandler
     document.getElementById("scalebutton").onclick = setScaleEventHandler
-
 
     // --- Create the Shape, then Load Point Data Onto GPU ---
 
@@ -224,16 +220,16 @@ window.onload = function init()
       vec4( 0.0, -0.4, -0.4,   1.0), 
       vec4(-0.4,  0.0, -0.4,   1.0), 
       // Bottom square face, T2
-      vec4( 0.4,  0.0, -0.4,   1.0),  
       vec4(-0.4,  0.0, -0.4,   1.0), 
       vec4( 0.0,  0.4, -0.4,   1.0),
+      vec4( 0.4,  0.0, -0.4,   1.0),  
       // side 1 triangle face
       vec4( 0.0, -0.4, -0.4,   1.0),  
       vec4( 0.0,  0.0,  0.4,   1.0), // Tip
       vec4( 0.4,  0.0, -0.4,   1.0), 
       // side 2 triangle face
       vec4( 0.4,  0.0, -0.4,   1.0),  
-      vec4( 0.0,  0.0, -0.4,   1.0), // Tip
+      vec4( 0.0,  0.0,  0.4,   1.0), // Tip
       vec4( 0.0,  0.4, -0.4,   1.0), 
       // side 3 triangle face
       vec4( 0.0,  0.4, -0.4,   1.0),  
@@ -247,24 +243,24 @@ window.onload = function init()
   pointLength = polygonPoints.length;
 
     var pointColors = [
-      [1.0, 0.0, 0.0, 0.8], // red  // Square face, T1
-      [1.0, 0.0, 0.0, 0.8], // red
-      [1.0, 0.0, 0.0, 0.8], // red
-      [1.0, 0.0, 0.0, 0.8], // red  // Square face, T2
-      [1.0, 0.0, 0.0, 0.8], // red
-      [1.0, 0.0, 0.0, 0.8], // red
-      [0.0, 0.0, 1.0, 0.8], // blue //  Triangle side 1
-      [0.0, 0.0, 1.0, 0.8], // blue
-      [0.0, 0.0, 1.0, 0.8], // blue
-      [1.0, 0.0, 1.0, 0.8], // purple //  Triangle side 2
-      [1.0, 0.0, 1.0, 0.8], // purple
-      [1.0, 0.0, 1.0, 0.8], // purple
-      [0.0, 1.0, 0.0, 0.8], // green //  Triangle side 3
-      [0.0, 1.0, 0.0, 0.8], // green
-      [0.0, 1.0, 0.0, 0.8], // green
-      [1.0, 1.0, 0.0, 0.8], // yellow //  Triangle side 4
-      [1.0, 1.0, 0.0, 0.8], // yellow
-      [1.0, 1.0, 0.0, 0.8], // yellow
+      [1.0, 0.0, 0.0, 1.0], // red  // Square face, T1
+      [1.0, 0.0, 0.0, 1.0], // red
+      [1.0, 0.0, 0.0, 1.0], // red
+      [1.0, 0.0, 0.0, 1.0], // red  // Square face, T2
+      [1.0, 0.0, 0.0, 1.0], // red
+      [1.0, 0.0, 0.0, 1.0], // red
+      [0.0, 0.0, 1.0, 1.0], // blue //  Triangle side 1
+      [0.0, 0.0, 1.0, 1.0], // blue
+      [0.0, 0.0, 1.0, 1.0], // blue
+      [1.0, 0.0, 1.0, 1.0], // purple //  Triangle side 2
+      [1.0, 0.0, 1.0, 1.0], // purple
+      [1.0, 0.0, 1.0, 1.0], // purple
+      [0.0, 1.0, 0.0, 1.0], // green //  Triangle side 3
+      [0.0, 1.0, 0.0, 1.0], // green
+      [0.0, 1.0, 0.0, 1.0], // green
+      [1.0, 1.0, 0.0, 1.0], // yellow //  Triangle side 4
+      [1.0, 1.0, 0.0, 1.0], // yellow
+      [1.0, 1.0, 0.0, 1.0], // yellow
     ]
 
     // Load onto the GPU and associate variables in the shader
