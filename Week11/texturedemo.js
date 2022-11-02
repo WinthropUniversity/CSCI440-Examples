@@ -108,7 +108,7 @@ var gCanvas = null;
                              "      gl_FragColor = fColor;" +
                              "    else" +
                              //"      gl_FragColor = texture2D( texture, fTexCoord );" +  // Use only texture
-                             "      gl_FragColor = fColor*texture2D( texture, fTexCoord );" +  // Combine texture
+                             "      gl_FragColor = texture2D( texture, fTexCoord );" +  // Combine texture
                              "}"
     var fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
     gl.shaderSource(fragmentShader, fragmentShaderCode);
@@ -253,6 +253,7 @@ async function main() {
     }
     image.crossOrigin = "anonymous";  // to avoid the CORS error ...
     image.src = "https://raw.githubusercontent.com/WinthropUniversity/CSCI440-Examples/master/Week11/falltexture.png";
+    //image.src = "https://raw.githubusercontent.com/WinthropUniversity/CSCI440-Examples/master/Week11/lavapaul.png";
     gObjectsList.push(myObject);
 
   

@@ -162,8 +162,8 @@ function setRotationEventHandler() {
                 Math.sin(radianAngle),   Math.cos(radianAngle),  0.0,
                 0.0,                     0.0,                    1.0);  
 
-    // Concatenate with previous transformations:
-    matrix = mult(R, matrix);
+  // Concatenate with previous transformations:
+  matrix = mult(R, matrix);
 
   // Send the transformation matrix to the GPU, then draw!
   gl.uniformMatrix3fv( matrixLoc, false, flatten(matrix));

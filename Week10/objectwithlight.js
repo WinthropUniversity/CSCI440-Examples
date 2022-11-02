@@ -10,7 +10,7 @@
 var ggl;
 var gPointLength;
 var gShaderProgram;
-var gLightPosition = vec4(-0.5, -0.5, 1.0, 0.0 );
+var gLightPosition = vec4(1.5, 5.5, 1.0, 0.0 );
 
 /**
  * Just an ugly way to get the contents from the fetch.
@@ -513,8 +513,8 @@ async function main() {
     SetupLighting(gLightPosition, 100.0, gl, shaderProgram)
 
     // Go grab an obj file for a model
-    const modelURL = 'https://raw.githubusercontent.com/WinthropUniversity/CSCI440-Examples/master/Week7/teapot.obj';
-    //const modelURL = 'https://raw.githubusercontent.com/WinthropUniversity/CSCI440-Examples/master/Week7/windmill.obj';
+    //const modelURL = 'https://raw.githubusercontent.com/WinthropUniversity/CSCI440-Examples/master/Week7/teapot.obj';
+    const modelURL = 'https://raw.githubusercontent.com/WinthropUniversity/CSCI440-Examples/master/Week7/windmill.obj';
     //const modelURL = 'https://raw.githubusercontent.com/WinthropUniversity/CSCI440-Examples/master/Week7/cube.obj';
     const objFileContents = await UglyFetchWrapper(modelURL);
     const objData = SimpleObjParse(objFileContents);
@@ -530,7 +530,7 @@ async function main() {
     gl.uniformMatrix4fv( gl.getUniformLocation(shaderProgram, "uProjectionMatrix"), false, flatten(perspMatrix));     
 
     // Get the camera view transform and store it on the GPU
-    var cameraMatrix = GetCameraViewOrientationMatrix(vec3(0.0, 0.0, 0.5), // where is the camera?
+    var cameraMatrix = GetCameraViewOrientationMatrix(vec3(0.0, 0.65, 0.75), // where is the camera?
                                                       vec3(0, 0, 0),    // where is it looking?
                                                       vec3(0, -1, 0) );  // Which way is up?
     gl.uniformMatrix4fv( gl.getUniformLocation(shaderProgram, "uCameraMatrix"), false, flatten(cameraMatrix));     
