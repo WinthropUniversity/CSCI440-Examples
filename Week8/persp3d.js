@@ -141,10 +141,14 @@ function GetCameraViewOrientationMatrix(eye, at, up) {
  *  Draw our pyramid as a shell of triangle and square faces, using lines 
  *  to do so.
  */
- function render(zCameraPosition) {
+ function render(zCameraPosition, yCameraAngle) {
 
   var modelMatrix = GetModelTransformationMatrix(30, -70, 90);
-  var cameraMatrix = GetCameraViewOrientationMatrix(vec3(0, 0, zCameraPosition),   // where is the camera?
+  var cameraTransformMatrix = GetModelTransformationMatrix(yCameraAngle, 0, 0);
+  var eye = vec4(0, 0, zCameraPosition, 1);
+  var eye = mult(cameraTransformMatrix, eye);
+
+  var cameraMatrix = GetCameraViewOrientationMatrix(vec3(eye[0], eye[1], eye[2]),   // where is the camera?
                                                     vec3(0, 0, 0),   // where is it looking?
                                                     vec3(0, 1, 0) ); // Which way is up?
   var perspMatrix = GetPerspectiveProjectionMatrix(45, -0.1, .2);
@@ -277,7 +281,8 @@ function LoadDataOnGPU(gl, myData, shaderVariableStr, shaderVariableDim, shaderP
  */
 function setTranslationEventHandler() {
     var tz = parseFloat(document.getElementById("translatez").value);
-    render(-tz);
+    var ry = parseFloat(document.getElementById("rotatey").value);
+    render(-tz, ry);
   }
 
   
@@ -309,6 +314,7 @@ window.onload = function init()
 
     // --- Add Event Handlers ---
     document.getElementById("translatez").oninput = setTranslationEventHandler
+    document.getElementById("rotatey").oninput = setTranslationEventHandler
 
 
     // --- Create the Shape, then Load Point Data Onto GPU ---
@@ -367,7 +373,7 @@ window.onload = function init()
     var colorBufferId = LoadDataOnGPU(gl, pointColors, "vColor", 4, shaderProgram  )
 
     pointLength = polygonPoints.length;
-    render(-0.5); //gl, polygonPoints.length);
+    render(-0.5, 0.0); //gl, polygonPoints.length);
 };
 
 

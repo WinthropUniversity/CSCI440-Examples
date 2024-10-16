@@ -336,9 +336,9 @@ async function main() {
     var shaderProgram = setupShaders(gl);
 
     // Try one of the other models!
-    const modelURL = 'https://raw.githubusercontent.com/WinthropUniversity/CSCI440-Examples/master/Week7/teapot.obj';
+    //const modelURL = 'https://raw.githubusercontent.com/WinthropUniversity/CSCI440-Examples/master/Week7/teapot.obj';
     //const modelURL = 'https://raw.githubusercontent.com/WinthropUniversity/CSCI440-Examples/master/Week7/windmill.obj';
-    //const modelURL = 'https://raw.githubusercontent.com/WinthropUniversity/CSCI440-Examples/master/Week7/cube.obj';
+    const modelURL = 'https://raw.githubusercontent.com/WinthropUniversity/CSCI440-Examples/master/Week7/cube.obj';
 
     const objFileContents = await UglyFetchWrapper(modelURL);
     const objData = SimpleObjParse(objFileContents);

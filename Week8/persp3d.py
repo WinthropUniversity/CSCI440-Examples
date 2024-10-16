@@ -63,12 +63,12 @@ def get_camera_framechange_matrix(eye, at, up):
   v = v / linalg.norm(v)
 
   # The new origin point involves shifting the eye 
-  p = -eye
+  p = eye
 
   # Translate camera to origin
-  T = matrix([ [1, 0, 0, p[0]],
-               [0, 1, 0, p[1]],
-               [0, 0, 1, p[2]],
+  T = matrix([ [1, 0, 0, -p[0]],
+               [0, 1, 0, -p[1]],
+               [0, 0, 1, -p[2]],
                [0, 0, 0, 1   ] ])
   
   # Get the frame transform of camera to world
@@ -101,15 +101,26 @@ def get_persectivematrix(fovy, near, far, width, height):
 
 # Build the tetrahedron in model frame
 tetrahedron = get_tetrahedron_vertices()
+print("Model space:")
+print(tetrahedron)
+print()
 
 # Put it into world frame by moving it and rotating it
-tetrahedron = rotate(30, matrix([[1,1,1]]).T,  translate(-0.5, -0.2, -0.2, reset_matrix())) * tetrahedron
+tetrahedron = rotate(30, matrix([[1,1,1]]).T,  translate(-0.5, -0.2, -5, reset_matrix())) * tetrahedron
+print("World space:")
+print(tetrahedron)
+print()
 
 # Put it into camera frame
 eye = array([0.5, 0.5, 0.5])
 at =  array([-0.5, -0.2, -0.2])
 up =  array([0, 1, 0])
 tetrahedron =  get_camera_framechange_matrix(eye, at, up) * tetrahedron
+print("Camera space:")
+print(tetrahedron)
+print()
 
 tetrahedron_na = get_persectivematrix(45, -2, 3, 10, 10) * tetrahedron
+print("Uncorrected perspectve:")
 print(tetrahedron_na)
+print()

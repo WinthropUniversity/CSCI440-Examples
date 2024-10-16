@@ -25,7 +25,7 @@
                             "varying vec3 vColor;" +      // Internal variable to pass arg between shaders
                             "void main() {" +
                             "    gl_PointSize = 5.0;" +
-                            "    gl_Position = position;" +
+                            "    gl_Position = vec4(-0.1, 0.0, 0.0, 0.0) + position;" +
                             "    vColor = color;" +
                             "}"
     var vertexShader = gl.createShader(gl.VERTEX_SHADER);
@@ -124,21 +124,20 @@ window.onload = function init()
     // --- Deal with the Data ---
 
     // Create an array of points representing the polygon
+    var a = 0.7;
     var polygonPoints = [     // theta
-        vec2( 1.00,   0.00),  //   0
-        vec2( 0.31,   0.95),  //  2*pi/5
-        vec2(-0.81,   0.59),  //  4*pi/5
-        vec2(-0.81,  -0.59),  //  6*pi/5
-        vec2( 0.31,  -0.95)   //  8*pi/5
+        vec2( a, a),
+        vec2(-a, a),
+        vec2(-a,-a),
+        vec2( a,-a)
     ];
 
     // Create array of colors 
     var colors = [
-        vec3(0,0,0),  // black
-        vec3(0,0,1),  // blue
-        vec3(0,1,1),  // aqua
-        vec3(0,1,0),  // green
-        vec3(1,1,0)   // yellow
+        vec3(0,.7,.7),  // aqua
+        vec3(0,0,.7),  // blue
+        vec3(0,.7,0),  // green
+        vec3(.7,0,0)
     ];
 
     // Load onto the GPU and associate variables in the shader
