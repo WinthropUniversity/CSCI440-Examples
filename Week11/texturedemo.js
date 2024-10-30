@@ -54,8 +54,9 @@ var gCanvas = null;
                             "uniform vec4 uAmbientProduct;" +      // Stored ambient color*material
                             "uniform vec4 uDiffuseProduct;" +      // Stored diffuse color*material
                             "uniform vec4 uSpecularProduct;" +     // Stored specular color*material
-                            "uniform vec4 uLightPosition;" +        // Stored light source point or direction vector
+                            "uniform vec4 uLightPosition;" +       // Stored light source point or direction vector
                             "uniform float uShininess;" +          // Stored shininess coefficient
+                            "uniform vec4 uEye;" +                 // Stored camera eye location
                             "" + 
                             "uniform mat4 uModelMatrix;" +         // Stored model transformation
                             "uniform mat4 uCameraMatrix;" +        // Camera view transformation
@@ -68,7 +69,7 @@ var gCanvas = null;
                             "  if (uLightPosition.w==0.0) L = normalize(uLightPosition.xyz);" +  // If light is directional
                             "  else L = normalize(uLightPosition.xyz-vertexPos);" +              // If light is a point
                             "" +
-                            "  vec3 E = -normalize(vertexPos);"+  // Direction of the viewer
+                            "  vec3 E = normalize(uEye.xyz-vertexPos);"+  // Direction of the viewer
                             "  vec3 H = normalize(L+E);" +        // Halfway vector
                             "  vec3 N = normalize( (uModelMatrix * vec4(vNormal,0.0)).xyz );" + // Normal vector in world coords
                             "" + // below are the Phong-Blinn terms
@@ -83,10 +84,10 @@ var gCanvas = null;
                             "  fTexCoord = vTexCoord;" + // Pass along the texture coordinate
                             "" + // Now compute the position after perspective transformation
                             "  gl_Position = uProjectionMatrix * uCameraMatrix * uModelMatrix * vPosition;" +
-                            "  gl_Position.x = gl_Position.x / gl_Position.w;" +
-                            "  gl_Position.y = gl_Position.y / gl_Position.w;" +
-                            "  gl_Position.z = gl_Position.z / gl_Position.w;" +
-                            "  gl_Position.w = 1.0;" +
+                            //"  gl_Position.x = gl_Position.x / gl_Position.w;" +  // RPW:  Does WebGL handle this for us??
+                            //"  gl_Position.y = gl_Position.y / gl_Position.w;" +
+                            //"  gl_Position.z = gl_Position.z / gl_Position.w;" +
+                            //"  gl_Position.w = 1.0;" +
                             "}"
     var vertexShader = gl.createShader(gl.VERTEX_SHADER);
     gl.shaderSource(vertexShader, vertexShaderCode);
@@ -146,19 +147,28 @@ var gCanvas = null;
  * @param {*} far  The far plane of the frustrum
  */
  function GetPerspectiveProjectionMatrix(fovy, near, far) {
-   var canvas = document.getElementById( "gl-canvas" );
-   var aspectRatio = canvas.width / canvas.height;
-   var fovyRadian = fovy * Math.PI / 180.0;
-   var nr = near;
-   var fr = far;
-   var tp = nr * Math.tan(fovyRadian);
-   var rgt = tp * aspectRatio;
+  var canvas = document.getElementById( "gl-canvas" );
+  var aspectRatio = canvas.width / canvas.height;
 
-   var P = ( mat4( nr/rgt,  0,             0,                     0,
-                   0,      nr/tp,          0,                     0,
-                   0,      0,              -(fr+nr)/(fr-nr),      (-2*fr*nr)/(fr-nr),
-                   0,      0,              -1,                    0) );  
-  return (P);
+  /*var fovyRadian = fovy * Math.PI / 180.0;
+  var nr = near;
+  var fr = far;
+  var tp = nr * Math.tan(fovyRadian);
+  var rgt = tp * aspectRatio;
+  var lft = -rgt;
+  var bt = -bt;
+
+  var M = mat4( 
+    nr/rgt,  0,             0,                     0,
+    0,      nr/tp,          0,                     0,
+    0,      0,              -(fr+nr)/(fr-nr),      (-2*fr*nr)/(fr-nr),
+    0,      0,              -1,                    0);*/
+  
+
+  // Or just use Angel & Shriener's function
+  var M = perspective(fovy, aspectRatio, near, far);
+
+  return ( M )
 }
 
 
@@ -179,6 +189,7 @@ var gCanvas = null;
                       vec3(0,1,0)); // Which way is "up"
     
     ggl.uniformMatrix4fv( ggl.getUniformLocation( gShaderProgram, "uCameraMatrix" ), false, flatten(cameraMatrix));
+    ggl.uniform4fv(ggl.getUniformLocation(gShaderProgram, "uEye"),flatten(vec4(xpos,0,zpos,1)) );     
 
     render();
 }
