@@ -330,6 +330,9 @@ function GetModelTransformationMatrix() {
 }
 
 
+/**
+ * Build all the lighting components and send them to the GPU
+ */
 function SetupLighting(lightPosition, materialShininess, gl, shaderProgram) {
   // Setup low-level Ambient lighting
   var ambientColor = vec4(0.25, 0.25, 0.25, 1.0); 
@@ -354,6 +357,18 @@ function SetupLighting(lightPosition, materialShininess, gl, shaderProgram) {
   gl.uniform4fv(gl.getUniformLocation(shaderProgram, "uLightPosition"),flatten(lightPosition) );  
 }
 
+
+/** 
+ * Get the camera view transform and store it on the GPU.  Here I move the eye around, but we always
+ * look at the origin, and "up" is always in the positive y direction.
+ **/
+function SetupCamera(eye, gl, shaderProgram) {
+  var cameraMatrix = GetCameraViewOrientationMatrix(vec3(eye[0], eye[1], eye[2]), // where is the camera?
+                                                    vec3(0, 0, 0),    // where is it looking?
+                                                    vec3(0, 1, 0) );  // Which way is up?
+  gl.uniformMatrix4fv(gl.getUniformLocation(shaderProgram, "uCameraMatrix"), false, flatten(cameraMatrix));   
+  gl.uniform4fv(gl.getUniformLocation(shaderProgram, "uEye"),flatten(eye) );     
+}
 
 
 /**
@@ -405,7 +420,7 @@ function SetupLighting(lightPosition, materialShininess, gl, shaderProgram) {
                             "  fColor.a = 1.0;" + // Ignore transluscence for now  */
                             "" + // Now compute the position after perspective transformation
                             "  gl_Position = uProjectionMatrix * uCameraMatrix * uModelMatrix * vPosition;" +
-                            //"  gl_Position.x = gl_Position.x / gl_Position.w;" +
+                            //"  gl_Position.x = gl_Position.x / gl_Position.w;" + // RPW:  WebGL does this for us??
                             //"  gl_Position.y = gl_Position.y / gl_Position.w;" +
                             //"  gl_Position.z = gl_Position.z / gl_Position.w;" +
                             //"  gl_Position.w = 1.0;" +
@@ -483,28 +498,31 @@ function render(gl, pointLength, shaderProgram) {
 }
 
 
+
 /**  This changes the angle of rotation of the eye of the camera around
  *   the y-axis.
  */
 function setRotateYEventHandler() {
- var theta = parseFloat(document.getElementById("yangleslider").value);
- var cs = Math.cos(theta);
- var sn = Math.sin(theta); 
- var ry = mat4( cs,   0.0,  sn,   0.0,
-                0.0,  1.0,  0.0,  0.0,
-               -sn,   0.0,  cs,   0.0,
-                0.0,  0.0,  0.0,  1.0 ); 
- gEyePosition = mult(ry, vec4(0,0,2,1));
-// Get the camera view transform and store it on the GPU
- var cameraMatrix = GetCameraViewOrientationMatrix(vec3(gEyePosition[0], gEyePosition[1], gEyePosition[2]), // where is the camera?
-                                                   vec3(0, 0, 0),    // where is it looking?
-                                                   vec3(0, 1, 0) );  // Which way is up?
- ggl.uniformMatrix4fv( ggl.getUniformLocation(gShaderProgram, "uCameraMatrix"), false, flatten(cameraMatrix));   
- ggl.uniform4fv(ggl.getUniformLocation(gShaderProgram, "uEye"),flatten(gEyePosition) );   
+  // Get the angle of rotation directly from the slider on the web page,
+  // then build an affine rotation matrix for rotation around the y-axis
+  var theta = parseFloat(document.getElementById("yangleslider").value);
+  var cs = Math.cos(theta);
+  var sn = Math.sin(theta); 
+  var ry = mat4( cs,   0.0,  sn,   0.0,
+                 0.0,  1.0,  0.0,  0.0,
+                -sn,   0.0,  cs,   0.0,
+                 0.0,  0.0,  0.0,  1.0 ); 
 
- render(ggl, gPointLength, gShaderProgram);
+  // Assume we start at +2 on the z-axis, then rotate from there
+  gEyePosition = mult(ry, vec4(0,0,2,1)); 
+
+  // Setup the camera view matrix on the GPU, then render the image!
+  SetupCamera(gEyePosition, ggl, gShaderProgram); 
+  render(ggl, gPointLength, gShaderProgram);
 }
 
+
+// -- This is the main function ---
 
     // Create the WebGL interface object and attach it to the 
     // canvas specified in the HTML file.  Give an error if WebGL
@@ -543,13 +561,8 @@ async function main() {
     var perspMatrix = GetPerspectiveProjectionMatrix(45, -.1, .1);
     gl.uniformMatrix4fv( gl.getUniformLocation(shaderProgram, "uProjectionMatrix"), false, flatten(perspMatrix));     
 
-    // Get the camera view transform and store it on the GPU
-    var cameraMatrix = GetCameraViewOrientationMatrix(vec3(gEyePosition[0], gEyePosition[1], gEyePosition[2]), // where is the camera?
-                                                      vec3(0, 0, 0),    // where is it looking?
-                                                      vec3(0, 1, 0) );  // Which way is up?
-    gl.uniformMatrix4fv( gl.getUniformLocation(shaderProgram, "uCameraMatrix"), false, flatten(cameraMatrix));
-    gl.uniform4fv(gl.getUniformLocation(shaderProgram, "uEye"),flatten(gEyePosition) );  
-  
+    SetupCamera(gEyePosition, gl, shaderProgram);
+
 
     // --- Add Event Handlers ---
     ggl = gl;
