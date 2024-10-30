@@ -10,7 +10,8 @@
 var ggl;
 var gPointLength;
 var gShaderProgram;
-var gLightPosition = vec4(-0.5, -0.5, 1.0, 0.0 );
+var gLightPosition = vec4(-3, -3, 3, 0.0 );
+var gEyePosition = vec4(0,0,2,1);
 
 /**
  * Just an ugly way to get the contents from the fetch.
@@ -18,7 +19,10 @@ var gLightPosition = vec4(-0.5, -0.5, 1.0, 0.0 );
  * @returns 
  */
 async function UglyFetchWrapper(objURL) {
-  const fetchResponse = await fetch(objURL);//, {mode:'no-cors'});
+  //const fetchResponse = await fetch(objURL, {mode:'no-cors'});
+  //const fetchResponse = await fetch(objURL, {mode:'same-origin'});
+  const fetchResponse = await fetch(objURL, {mode:'cors'});
+  //const fetchResponse = await fetch(objURL);
   const objFileContents = await fetchResponse.text();
   return objFileContents;
 }
@@ -147,7 +151,7 @@ function VerySimpleTriangleVertexExtraction(objDictionary) {
  * @param {*} points An array of points, where every three points form a triangle
  * @returns Array of vec3 points representing the normals of the object polygons
  */
- function EstimateNormalsFromTriangles(points) {
+function EstimateNormalsFromTriangles(points) {
   var normals = new Array();
 
   for (let triIdx=0; triIdx<points.length; triIdx+=3) {
@@ -190,22 +194,29 @@ function VerySimpleTriangleVertexExtraction(objDictionary) {
  * @param {*} near The near plane of the frustrum
  * @param {*} far  The far plane of the frustrum
  */
- function GetPerspectiveProjectionMatrix(fovy, near, far) {
+function GetPerspectiveProjectionMatrix(fovy, near, far) {
   var canvas = document.getElementById( "gl-canvas" );
   var aspectRatio = canvas.width / canvas.height;
-  var fovyRadian = fovy * Math.PI / 180.0;
+
+  /*var fovyRadian = fovy * Math.PI / 180.0;
   var nr = near;
   var fr = far;
   var tp = nr * Math.tan(fovyRadian);
   var rgt = tp * aspectRatio;
-  //var lft = -rgt;
+  var lft = -rgt;
   var bt = -bt;
 
-  return ( mat4( 
+  var M = mat4( 
     nr/rgt,  0,             0,                     0,
     0,      nr/tp,          0,                     0,
     0,      0,              -(fr+nr)/(fr-nr),      (-2*fr*nr)/(fr-nr),
-    0,      0,              -1,                    0) );  
+    0,      0,              -1,                    0);*/
+  
+
+  // Or just use Angel & Shriener's function
+  var M = perspective(fovy, aspectRatio, near, far);
+
+  return ( M )
 }
 
 
@@ -217,8 +228,8 @@ function VerySimpleTriangleVertexExtraction(objDictionary) {
  *   @param at  The vector locating the position in world frame at which the camera is looking
  *   @param up  The vector indicating which way is "up" for the camera
  **/
- function GetCameraViewOrientationMatrix(eye, at, up) {
-  // Get the normal vector, VPN p. 271, Angel & Schreiner
+function GetCameraViewOrientationMatrix(eye, at, up) {
+  /*// Get the normal vector, VPN p. 271, Angel & Schreiner
   var n = subtract(eye,at);
   n = normalize(n);
 
@@ -245,44 +256,18 @@ function VerySimpleTriangleVertexExtraction(objDictionary) {
                 u[1], v[1], n[1], 0,
                 u[2], v[2], n[2], 0,
                 0, 0, 0, 1 );             
-  A = mult(A,T);
+  var M = mult(A,T);
 
   // Invert to get the actual coord. rotation f
-  var M = inverse(A);
+  M = inverse(A);*/
 
   // Or just use the built-in function for this ...
-  //var M = lookAt(eye, at, up);
-  //M = inverse(M);
+  var M = lookAt(eye, at, up);
   
   // Return the view orientation change matrix for the camera
   return (M);
 }
 
-
-
-/**
- *  Draw our pyramid as a shell of triangle and square faces, using lines 
- *  to do so.
- */
- function render(zCameraPosition) {
-
-  var modelMatrix = GetModelTransformationMatrix(30, -70, 90);
-  var cameraMatrix = GetCameraViewOrientationMatrix(vec3(0, 0, zCameraPosition),   // where is the camera?
-                                                    vec3(0, 0, 0),   // where is it looking?
-                                                    vec3(0, 1, 0) ); // Which way is up?
-  var perspMatrix = GetPerspectiveProjectionMatrix(45, -.1, .1);
-
-  // --- Now Draw the Polygon for the First Time ---
-  gl.uniformMatrix4fv( modelMatrixLoc, false, flatten(modelMatrix));
-  gl.uniformMatrix4fv( cameraMatrixLoc, false, flatten(cameraMatrix));
-  gl.uniformMatrix4fv( perspMatrixLoc, false, flatten(perspMatrix));  
-
-    // Clear the color & depth buffers
-    gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
-    // Draw the faces
-    gl.drawArrays( gl.TRIANGLES, 0, pointLength );
-}
 
 
 
@@ -292,15 +277,17 @@ function VerySimpleTriangleVertexExtraction(objDictionary) {
  * @returns A simple 3D homogeneous transform to shrink and rotate the shape
  */
 function GetModelTransformationMatrix() {
-  var csy = Math.cos(-Math.PI/8);
-  var sny = Math.sin(-Math.PI/8);
-  var csx = Math.cos(-Math.PI/8);
-  var snx = Math.sin(-Math.PI/8);
+  var scale = 0.1;//1.0;
+  var angle = 0;//-Math.PI/8;
+  var csy = Math.cos(angle);
+  var sny = Math.sin(angle);
+  var csx = Math.cos(angle);
+  var snx = Math.sin(angle);
 
   // Some standard rotation matrices
-  var ts = mat4( 0.1,  0.0,  0.0,  0.0,
-                 0.0,  0.1,  0.0,  0.0,
-                 0.0,  0.0,  0.1,  0.0,
+  var ts = mat4( scale,  0.0,  0.0,  0.0,
+                 0.0,  scale,  0.0,  0.0,
+                 0.0,  0.0,  scale,  0.0,
                  0.0,  0.0,  0.0,  1.0 );                 
   var ry = mat4( csy,   0.0,  sny,   0.0,
                  0.0,  1.0,  0.0,  0.0,
@@ -311,8 +298,8 @@ function GetModelTransformationMatrix() {
                   0.0,  snx,   csx,   0.0,
                   0.0,  0.0,  0.0,  1.0 );  
  
-  //return ( mult(rx,mult(ry,ts)) );
-  return(ts);
+  return ( mult(rx,mult(ry,ts)) );
+  //return(ts);
 }
 
 
@@ -389,8 +376,9 @@ function SetupLighting(lightPosition, materialShininess, gl, shaderProgram) {
                             "uniform vec4 uAmbientProduct;" +      // Stored ambient color*material
                             "uniform vec4 uDiffuseProduct;" +      // Stored diffuse color*material
                             "uniform vec4 uSpecularProduct;" +     // Stored specular color*material
-                            "uniform vec4 uLightPosition;" +        // Stored light source point or direction vector
+                            "uniform vec4 uLightPosition;" +       // Stored light source point or direction vector
                             "uniform float uShininess;" +          // Stored shininess coefficient
+                            "uniform vec4 uEye;" +                 // Stored position of the viewer (camera)
                             "" + 
                             "uniform mat4 uModelMatrix;" +         // Stored model transformation
                             "uniform mat4 uCameraMatrix;" +        // Camera view transformation
@@ -403,9 +391,10 @@ function SetupLighting(lightPosition, materialShininess, gl, shaderProgram) {
                             "  if (uLightPosition.w==0.0) L = normalize(uLightPosition.xyz);" +  // If light is directional
                             "  else L = normalize(uLightPosition.xyz-vertexPos);" +              // If light is a point
                             "" +
-                            "  vec3 E = -normalize(vertexPos);"+  // Direction of the viewer
+                            "  vec3 E = normalize(uEye.xyz-vertexPos);"+  // Direction of the viewer
                             "  vec3 H = normalize(L+E);" +        // Halfway vector
                             "  vec3 N = normalize( (uModelMatrix * vec4(vNormal,0.0)).xyz );" + // Normal vector in world coords
+                            "" +
                             "" + // below are the Phong-Blinn terms
                             "  vec4 ambient = uAmbientProduct;" +                       // Ambient term
                             "  vec4 diffuse = max( dot(L,N), 0.0) * uDiffuseProduct;" + // Diffuse term
@@ -415,11 +404,11 @@ function SetupLighting(lightPosition, materialShininess, gl, shaderProgram) {
                             "  fColor = ambient + diffuse + specular;" + 
                             "  fColor.a = 1.0;" + // Ignore transluscence for now  */
                             "" + // Now compute the position after perspective transformation
-                            "    gl_Position = uProjectionMatrix * uCameraMatrix * uModelMatrix * vPosition;" +
-                            "    gl_Position.x = gl_Position.x / gl_Position.w;" +
-                            "    gl_Position.y = gl_Position.y / gl_Position.w;" +
-                            "    gl_Position.z = gl_Position.z / gl_Position.w;" +
-                            "    gl_Position.w = 1.0;" +
+                            "  gl_Position = uProjectionMatrix * uCameraMatrix * uModelMatrix * vPosition;" +
+                            //"  gl_Position.x = gl_Position.x / gl_Position.w;" +
+                            //"  gl_Position.y = gl_Position.y / gl_Position.w;" +
+                            //"  gl_Position.z = gl_Position.z / gl_Position.w;" +
+                            //"  gl_Position.w = 1.0;" +
                             "}"
     var vertexShader = gl.createShader(gl.VERTEX_SHADER);
     gl.shaderSource(vertexShader, vertexShaderCode);
@@ -485,13 +474,35 @@ function render(gl, pointLength, shaderProgram) {
 // -- These are the button event handlers ---
 
 /**
- *  This causes the shape to be translated from its original position
- *  based on the parameters set in the spinner box fields on the HTML page.
+ *  This causes changes the shiny coefficient used in the lighting model.
  */
  function setShinyEventHandler() {
   var ts = parseFloat(document.getElementById("shinyslider").value);
   SetupLighting(gLightPosition, Math.pow(10.0,ts), ggl, gShaderProgram)
   render(ggl, gPointLength, gShaderProgram);
+}
+
+
+/**  This changes the angle of rotation of the eye of the camera around
+ *   the y-axis.
+ */
+function setRotateYEventHandler() {
+ var theta = parseFloat(document.getElementById("yangleslider").value);
+ var cs = Math.cos(theta);
+ var sn = Math.sin(theta); 
+ var ry = mat4( cs,   0.0,  sn,   0.0,
+                0.0,  1.0,  0.0,  0.0,
+               -sn,   0.0,  cs,   0.0,
+                0.0,  0.0,  0.0,  1.0 ); 
+ gEyePosition = mult(ry, vec4(0,0,2,1));
+// Get the camera view transform and store it on the GPU
+ var cameraMatrix = GetCameraViewOrientationMatrix(vec3(gEyePosition[0], gEyePosition[1], gEyePosition[2]), // where is the camera?
+                                                   vec3(0, 0, 0),    // where is it looking?
+                                                   vec3(0, 1, 0) );  // Which way is up?
+ ggl.uniformMatrix4fv( ggl.getUniformLocation(gShaderProgram, "uCameraMatrix"), false, flatten(cameraMatrix));   
+ ggl.uniform4fv(ggl.getUniformLocation(gShaderProgram, "uEye"),flatten(gEyePosition) );   
+
+ render(ggl, gPointLength, gShaderProgram);
 }
 
 
@@ -516,6 +527,9 @@ async function main() {
     const modelURL = 'https://raw.githubusercontent.com/WinthropUniversity/CSCI440-Examples/master/Week7/teapot.obj';
     //const modelURL = 'https://raw.githubusercontent.com/WinthropUniversity/CSCI440-Examples/master/Week7/windmill.obj';
     //const modelURL = 'https://raw.githubusercontent.com/WinthropUniversity/CSCI440-Examples/master/Week7/cube.obj';
+    //const modelURL = 'https://raw.githubusercontent.com/WinthropUniversity/CSCI440-Examples/refs/heads/master/Resources/Fox.obj';
+    //const modelURL = 'https://raw.githubusercontent.com/WinthropUniversity/CSCI440-Examples/refs/heads/master/Resources/car.obj';
+
     const objFileContents = await UglyFetchWrapper(modelURL);
     const objData = SimpleObjParse(objFileContents);
     const points = VerySimpleTriangleVertexExtraction(objData);  
@@ -530,16 +544,19 @@ async function main() {
     gl.uniformMatrix4fv( gl.getUniformLocation(shaderProgram, "uProjectionMatrix"), false, flatten(perspMatrix));     
 
     // Get the camera view transform and store it on the GPU
-    var cameraMatrix = GetCameraViewOrientationMatrix(vec3(0.0, 0.0, 0.5), // where is the camera?
+    var cameraMatrix = GetCameraViewOrientationMatrix(vec3(gEyePosition[0], gEyePosition[1], gEyePosition[2]), // where is the camera?
                                                       vec3(0, 0, 0),    // where is it looking?
-                                                      vec3(0, -1, 0) );  // Which way is up?
-    gl.uniformMatrix4fv( gl.getUniformLocation(shaderProgram, "uCameraMatrix"), false, flatten(cameraMatrix));     
+                                                      vec3(0, 1, 0) );  // Which way is up?
+    gl.uniformMatrix4fv( gl.getUniformLocation(shaderProgram, "uCameraMatrix"), false, flatten(cameraMatrix));
+    gl.uniform4fv(gl.getUniformLocation(shaderProgram, "uEye"),flatten(gEyePosition) );  
+  
 
     // --- Add Event Handlers ---
     ggl = gl;
     gPointLength = points.length;
     gShaderProgram = shaderProgram;
     document.getElementById("shinyslider").oninput = setShinyEventHandler
+    document.getElementById("yangleslider").oninput = setRotateYEventHandler
 
     // --- Draw that thing! ---
     render(gl, points.length, shaderProgram);
