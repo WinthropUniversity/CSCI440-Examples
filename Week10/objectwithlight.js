@@ -277,7 +277,7 @@ function GetCameraViewOrientationMatrix(eye, at, up) {
  * @returns A simple 3D homogeneous transform to shrink and rotate the shape
  */
 function GetModelTransformationMatrix() {
-  var scale = 0.1;//1.0;
+  var scale = 0.02;//1.0;
   var angle = 0;//-Math.PI/8;
   var csy = Math.cos(angle);
   var sny = Math.sin(angle);
@@ -336,19 +336,22 @@ function GetModelTransformationMatrix() {
 function SetupLighting(lightPosition, materialShininess, gl, shaderProgram) {
   // Setup low-level Ambient lighting
   var ambientColor = vec4(0.25, 0.25, 0.25, 1.0); 
-  var ambientMaterial = vec4(1.0, 1.0, 1.0, 1.0);
+  var ambientMaterial = vec4(1.0, 1.0, 1.0, 1.0);  
+  //var ambientMaterial = vec4(0.50980395, 0.0, 0.0, 1.0);   // Teapot material colors
   var ambientProduct = mult(ambientColor, ambientMaterial);
   gl.uniform4fv(gl.getUniformLocation(shaderProgram, "uAmbientProduct"), flatten(ambientProduct));
 
   // Setup white Diffuse lighting
   var diffuseColor = vec4(1.0, 1.0, 1.0, 1.0);
-  var diffuseMaterial = vec4( 1.0, 0.75, 0.25, 1.0);
+  var diffuseMaterial = vec4( 1.0, 0.75, 0.25, 1.0);   
+  //var diffuseMaterial = vec4( 0.50980395, 0, 0, 1.0);      // Teapot material colors
   var diffuseProduct = mult(diffuseColor, diffuseMaterial);
   gl.uniform4fv(gl.getUniformLocation(shaderProgram, "uDiffuseProduct"), flatten(diffuseProduct));
 
   // Setup white Specular lighting
   var speculaColor = vec4(1.0, 1.0, 1.0, 1.0);
-  var specularMaterial = vec4( 1.0, 0.75, 0.25, 1.0);
+  var specularMaterial = vec4( 1.0, 0.25, 0.75, 1.0);  
+  //var specularMaterial = vec4( 0.80099994, 0.80099994, 0.80099994, 1.0);    // Teapot material colors
   var specularProduct = mult(speculaColor, specularMaterial);
   gl.uniform4fv(gl.getUniformLocation(shaderProgram, "uSpecularProduct"), flatten(specularProduct));
 
@@ -542,11 +545,11 @@ async function main() {
     SetupLighting(gLightPosition, 100.0, gl, shaderProgram)
 
     // Go grab an obj file for a model
-    const modelURL = 'https://raw.githubusercontent.com/WinthropUniversity/CSCI440-Examples/master/Week7/teapot.obj';
+    //const modelURL = 'https://raw.githubusercontent.com/WinthropUniversity/CSCI440-Examples/master/Week7/teapot.obj';
     //const modelURL = 'https://raw.githubusercontent.com/WinthropUniversity/CSCI440-Examples/master/Week7/windmill.obj';
     //const modelURL = 'https://raw.githubusercontent.com/WinthropUniversity/CSCI440-Examples/master/Week7/cube.obj';
     //const modelURL = 'https://raw.githubusercontent.com/WinthropUniversity/CSCI440-Examples/refs/heads/master/Resources/Fox.obj';
-    //const modelURL = 'https://raw.githubusercontent.com/WinthropUniversity/CSCI440-Examples/refs/heads/master/Resources/car.obj';
+    const modelURL = 'https://raw.githubusercontent.com/WinthropUniversity/CSCI440-Examples/refs/heads/master/Resources/car.obj';
 
     const objFileContents = await UglyFetchWrapper(modelURL);
     const objData = SimpleObjParse(objFileContents);

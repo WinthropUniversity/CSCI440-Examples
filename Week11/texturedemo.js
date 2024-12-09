@@ -108,8 +108,10 @@ var gCanvas = null;
                              "    if (fTexCoord.x < 0.0)" +  // Flag to ignore texture
                              "      gl_FragColor = fColor;" +
                              "    else" +
+                             //"      gl_FragColor = fColor;" +  // Use only lighting color
                              //"      gl_FragColor = texture2D( texture, fTexCoord );" +  // Use only texture
-                             "      gl_FragColor = fColor*texture2D( texture, fTexCoord );" +  // Combine texture
+                             //"      gl_FragColor = fColor*texture2D( texture, fTexCoord );" +  // Combine texture stupidly
+                             "      gl_FragColor = 0.2*fColor + 0.8*texture2D( texture, fTexCoord );" +  // Combine texture better
                              "}"
     var fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
     gl.shaderSource(fragmentShader, fragmentShaderCode);
